@@ -1,0 +1,16 @@
+{
+  "codeKey": "code",
+  "msgKey": "retDesc",
+  "dataKey": [
+    "rspBody",
+    "resultData"
+  ],
+  "successCode": [
+    "0000000",
+    "1001"
+  ],
+  "error": {
+    "1001": "网络异常",
+    "60091": "Token已失效"
+  }
+}
