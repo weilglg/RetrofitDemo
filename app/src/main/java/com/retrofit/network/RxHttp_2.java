@@ -11,7 +11,7 @@ import com.retrofit.network.cookie.CookieManager;
 import com.retrofit.network.cookie.SharedPrefsCookiePersistor;
 import com.retrofit.network.entity.HttpConfigEntity;
 import com.retrofit.network.exception.ExceptionFactory;
-import com.retrofit.network.interceptor.BaseInterceptor;
+import com.retrofit.network.interceptor.HeaderInterceptor;
 import com.retrofit.network.subscribe.ResponseCallback;
 import com.retrofit.network.subscribe.RxSubscribe;
 
@@ -349,7 +349,7 @@ public class RxHttp_2 {
         }
 
         /**
-         * 添加请求Header，通过{@link BaseInterceptor}完成添加
+         * 添加请求Header，通过{@link HeaderInterceptor}完成添加
          * {@link OkHttpClient.Builder#addInterceptor(Interceptor)}
          */
         public Builder addHeader(Map<String, String> headers) {
@@ -358,7 +358,7 @@ public class RxHttp_2 {
         }
 
         /**
-         * 添加参数，通过{@link BaseInterceptor}完成添加
+         * 添加参数，通过{@link HeaderInterceptor}完成添加
          * {@link OkHttpClient.Builder#addInterceptor(Interceptor)}
          */
         public Builder addParameters(Map<String, String> parameters) {
@@ -574,11 +574,11 @@ public class RxHttp_2 {
             }
 
             if (configEntity.headers != null && configEntity.headers.size() > 0) {
-                okhttpBuilder.addInterceptor(new BaseInterceptor(configEntity.headers));
+                okhttpBuilder.addInterceptor(new HeaderInterceptor(configEntity.headers));
             }
 
             if (configEntity.parameters != null && configEntity.parameters.size() > 0) {
-                okhttpBuilder.addInterceptor(new BaseInterceptor(configEntity.headers));
+                okhttpBuilder.addInterceptor(new HeaderInterceptor(configEntity.headers));
             }
 
             if (configEntity.interceptorList != null && configEntity.interceptorList.size() > 0) {

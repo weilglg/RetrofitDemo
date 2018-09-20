@@ -98,6 +98,4 @@ public class Util {
         return RequestBody.create(MediaType.parse(MULTIPART_FORM_DATA + "; charset=utf-8"), descriptionString);
     }
 
-
-
 }

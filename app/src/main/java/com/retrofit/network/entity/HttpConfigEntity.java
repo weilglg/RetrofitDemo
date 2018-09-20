@@ -54,7 +54,7 @@ public class HttpConfigEntity implements Serializable {
                 ", baseUrl='" + baseUrl + '\'' +
                 ", isLog=" + isLog +
                 ", isCookie=" + isCookie +
-                ", isCache=" + isCache +
+                ", getmCache=" + isCache +
                 ", isUseDefault=" + isUseDefault +
                 ", tag=" + tag +
                 ", cache=" + cache +

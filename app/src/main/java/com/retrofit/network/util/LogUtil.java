@@ -14,7 +14,7 @@ import java.io.InputStreamReader;
 
 public class LogUtil {
     private static boolean sDebug = BuildConfig.DEBUG;
-    private static final String LOG_TAG = "down";
+    private static final String LOG_TAG = "RxHttp";
     public static final boolean DEBUG_DEBUG = true;
     public static final boolean DEBUG_ERROR = true;
     public static final boolean DEBUG_PERFORMENCE = true;
