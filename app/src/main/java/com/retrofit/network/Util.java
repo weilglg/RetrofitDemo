@@ -20,6 +20,7 @@ public class Util {
     public static final String MULTIPART_APK_DATA = "application/vnd.android.package-archive";
     public static final String MULTIPART_JAVA_DATA = "java/*";
     public static final String MULTIPART_MESSAGE_DATA = "message/rfc822";
+    public static final String MULTIPART_BYTE_DATE = "application/octet-stream";
 
     public static boolean isEmpty(String str) {
         return str == null || "".equals(str) || "null".equals(str);
@@ -62,6 +63,11 @@ public class Util {
             throw new NullPointerException(message);
         }
         return object;
+    }
+
+    public static RequestBody createBytes(byte[] bytes) {
+        checkNotNull(bytes, "json not null!");
+        return RequestBody.create(okhttp3.MediaType.parse(MULTIPART_BYTE_DATE), bytes);
     }
 
     public static RequestBody createJson(String jsonString) {

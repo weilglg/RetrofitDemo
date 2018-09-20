@@ -9,6 +9,7 @@ import com.retrofit.network.Demo;
 import com.retrofit.network.RxHttp;
 import com.retrofit.network.config.ResultConfigLoader;
 import com.retrofit.network.exception.CommThrowable;
+import com.retrofit.network.request.HttpBodyRequest;
 import com.retrofit.network.subscribe.ResponseCallback;
 import com.retrofit.network.subscribe.ResponseGenericsCallback;
 
@@ -32,13 +33,13 @@ public class MainActivity extends AppCompatActivity {
 
         HashMap<String, String> map = new HashMap<>();
         map.put("111", "2222");
-        util = RxHttp.createBuilder(getApplicationContext())
-                .baseUrl("http://www.baidu.com")
-                .connectTimeOut(60)
-                .readTimeOut(100)
-                .context(this)
-                .addHeader(map)
-                .build();
+//        util = RxHttp.createBuilder(getApplicationContext())
+//                .baseUrl("http://www.baidu.com")
+//                .connectTimeOut(60)
+//                .readTimeOut(100)
+//                .context(this)
+//                .addHeader(map)
+//                .build();
 //        Log.e("TAG", util.toString());
         findViewById(R.id.tv).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,24 +76,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.tv2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                RxHttp.restoreDefaultBuilder().build();
-                Observable<Integer> just = Observable.just(1, 2, 3);
-                DisposableObserver disposableObserver = util.rxHttp(null, just, new ResponseCallback<Integer>() {
-                    @Override
-                    protected void onError(Object tag, CommThrowable throwable) {
-                        Log.e("TAG", "onError");
-                    }
-
-                    @Override
-                    protected void onSuccess(Object tag, Integer result) {
-                        Log.e("TAG", "onSuccess");
-                    }
-
-                    @Override
-                    public Integer onTransformationResponse(Object tag, ResponseBody body) throws Exception {
-                        return null;
-                    }
-                });
+               new HttpBodyRequest("").baseUrl("");
             }
         });
     }

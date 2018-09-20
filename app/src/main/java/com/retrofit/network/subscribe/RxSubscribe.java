@@ -46,7 +46,7 @@ public class RxSubscribe<T> extends BaseSubscribe<ResponseBody> {
     }
 
     @Override
-    void onError(CommThrowable throwable) {
+    public void onError(CommThrowable throwable) {
         if (callback != null) {
             callback.onError(tag, throwable);
         }

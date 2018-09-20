@@ -1,24 +1,24 @@
+
 package com.retrofit.network.subscribe;
 
 import android.content.Context;
 
-import com.retrofit.network.util.LogUtil;
 import com.retrofit.network.exception.CommThrowable;
 import com.retrofit.network.exception.ExceptionFactory;
+import com.retrofit.network.util.LogUtil;
 
 import java.lang.ref.WeakReference;
 
 import io.reactivex.annotations.NonNull;
 import io.reactivex.observers.DisposableObserver;
 
-public abstract class BaseSubscribe<T> extends DisposableObserver<T> {
+public abstract class BaseSubscriber<T> extends DisposableObserver<T> {
+    private WeakReference<Context> contextWeakReference;
 
-    public WeakReference<Context> contextWeakReference;
-
-    public BaseSubscribe() {
+    public BaseSubscriber() {
     }
 
-    public BaseSubscribe(Context context) {
+    public BaseSubscriber(Context context) {
         this.contextWeakReference = new WeakReference<>(context);
     }
 

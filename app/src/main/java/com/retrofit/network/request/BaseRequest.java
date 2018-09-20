@@ -34,8 +34,9 @@ import retrofit2.CallAdapter;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 
-public abstract class BaseRequest {
-    private String mUrl;                                               //请求Url
+@SuppressWarnings(value = {"unchecked", "deprecation"})
+public abstract class BaseRequest<R extends BaseRequest> {
+    protected String mUrl;                                               //请求Url
     private Cache mCache;                                              //OkHttp缓存对象
     private File mCacheFile;                                           //缓存目录
     private long mCacheMaxSize;                                       //最大缓存
@@ -54,18 +55,18 @@ public abstract class BaseRequest {
     private int mReadTimeout;                                          //读超时
     private int mWriteTimeout;                                         //写超时
     private int mConnectTimeout;                                       //链接超时
-    private int mRetryCount;                    //重试次数默认3次
-    private int mRetryDelay;                    //延迟xxms重试
-    private int mRetryIncreaseDelay;    //叠加延迟
+    protected int mRetryCount;                    //重试次数默认3次
+    protected int mRetryDelay;                    //延迟xxms重试
+    protected int mRetryIncreaseDelay;    //叠加延迟
     private List<Interceptor> mInterceptorList = new ArrayList<>();
     private List<Interceptor> mNetworkInterceptorList = new ArrayList<>();
     private Context context;
     private String mBaseUrl;
     private boolean isSign = false;
     private boolean accessToken = false;
-    private boolean isSyncRequest = false;
+    protected boolean isSyncRequest = false;
     private Retrofit mRetrofit;
-    private ApiManager mApiManager;
+    protected ApiManager mApiManager;
 
 
     public BaseRequest(String url) {
@@ -78,163 +79,163 @@ public abstract class BaseRequest {
         }
     }
 
-    public BaseRequest baseUrl(String baseUrl) {
+    public R baseUrl(String baseUrl) {
         this.mBaseUrl = Util.checkNotNull(baseUrl, "baseUrl is null");
-        return this;
+        return (R) this;
     }
 
-    public BaseRequest isAccessToken(boolean accessToken) {
+    public R isAccessToken(boolean accessToken) {
         this.accessToken = accessToken;
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest isSyncRequest(boolean isSyncRequest) {
+    public R isSyncRequest(boolean isSyncRequest) {
         this.isSyncRequest = isSyncRequest;
-        return this;
+       return (R) this;
     }
 
 
-    public BaseRequest cache(Cache cache) {
+    public R cache(Cache cache) {
         this.mCache = Util.checkNotNull(cache, "cache is null");
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest cacheFile(File cacheFile) {
+    public R cacheFile(File cacheFile) {
         this.mCacheFile = Util.checkNotNull(cacheFile, "cacheFile is null");
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest okProxy(Proxy proxy) {
+    public R okProxy(Proxy proxy) {
         this.mProxy = Util.checkNotNull(proxy, "proxy is null");
         ;
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest hostnameVerifier(HostnameVerifier hostnameVerifier) {
+    public R hostnameVerifier(HostnameVerifier hostnameVerifier) {
         this.mHostnameVerifier = Util.checkNotNull(hostnameVerifier, "hostnameVerifier is null");
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest converterFactory(Converter.Factory converterFactory) {
+    public R converterFactory(Converter.Factory converterFactory) {
         this.mConverterFactory = Util.checkNotNull(converterFactory, "converterFactory is null");
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest callAdapterFactory(CallAdapter.Factory callAdapterFactory) {
+    public R callAdapterFactory(CallAdapter.Factory callAdapterFactory) {
         this.mCallAdapterFactory = Util.checkNotNull(callAdapterFactory, "callAdapterFactory is null");
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest sslSocketFactory(SSLSocketFactory sslSocketFactory) {
+    public R sslSocketFactory(SSLSocketFactory sslSocketFactory) {
         this.mSslSocketFactory = Util.checkNotNull(sslSocketFactory, "sslSocketFactory is null");
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest trustManager(X509TrustManager trustManager) {
+    public R trustManager(X509TrustManager trustManager) {
         this.mTrustManager = Util.checkNotNull(trustManager, "trustManager is null");
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest cookieJar(CookieJar cookieJar) {
+    public R cookieJar(CookieJar cookieJar) {
         this.mCookieJar = Util.checkNotNull(cookieJar, "cookieJar is null");
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest connectionPool(ConnectionPool connectionPool) {
+    public R connectionPool(ConnectionPool connectionPool) {
         this.mConnectionPool = Util.checkNotNull(connectionPool, "connectionPool is null");
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest headers(Map<String, String> headers) {
+    public R headers(Map<String, String> headers) {
         this.mHeaders.putAll(Util.checkNotNull(headers, "headers is null"));
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest parameters(Map<String, String> parameters) {
+    public R parameters(Map<String, String> parameters) {
         this.mParameters.putAll(Util.checkNotNull(parameters, "param is null"));
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest httpClient(OkHttpClient httpClient) {
+    public R httpClient(OkHttpClient httpClient) {
         this.mHttpClient = Util.checkNotNull(httpClient, "OkHttpClient is null");
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest readTimeOut(int readTimeout) {
+    public R readTimeOut(int readTimeout) {
         if (mReadTimeout < 0)
             throw new IllegalArgumentException("readTimeout must > 0");
         this.mReadTimeout = readTimeout;
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest writeTimeOut(int writeTimeout) {
+    public R writeTimeOut(int writeTimeout) {
         if (mWriteTimeout < 0)
             throw new IllegalArgumentException("writeTimeout must > 0");
         this.mWriteTimeout = writeTimeout;
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest connectTimeOut(int connectTimeout) {
+    public R connectTimeOut(int connectTimeout) {
         if (mConnectTimeout < 0)
             throw new IllegalArgumentException("connectTimeout must > 0");
         this.mConnectTimeout = connectTimeout;
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest interceptorList(List<Interceptor> interceptorList) {
+    public R interceptorList(List<Interceptor> interceptorList) {
         this.mInterceptorList.addAll(Util.checkNotNull(interceptorList, "Interceptor is null"));
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest addInterceptor(Interceptor interceptor) {
+    public R addInterceptor(Interceptor interceptor) {
         this.mInterceptorList.add(Util.checkNotNull(interceptor, "Interceptor is null"));
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest networkInterceptorList(List<Interceptor> networkInterceptorList) {
+    public R networkInterceptorList(List<Interceptor> networkInterceptorList) {
         this.mNetworkInterceptorList.addAll(Util.checkNotNull(networkInterceptorList, "NetworkInterceptor is null"));
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest addNetworkInterceptor(Interceptor interceptor) {
+    public R addNetworkInterceptor(Interceptor interceptor) {
         this.mNetworkInterceptorList.add(Util.checkNotNull(interceptor, "NetworkInterceptor is null"));
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest isSign(boolean isSign) {
+    public R isSign(boolean isSign) {
         this.isSign = isSign;
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest retryCount(int mRetryCount) {
+    public R retryCount(int mRetryCount) {
         if (mRetryCount < 0)
             throw new IllegalArgumentException("retryIncreaseDelay must > 0");
         this.mRetryCount = mRetryCount;
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest retryDelay(int mRetryDelay) {
+    public R retryDelay(int mRetryDelay) {
         if (mRetryDelay < 0)
             throw new IllegalArgumentException("retryIncreaseDelay must > 0");
         this.mRetryDelay = mRetryDelay;
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest retryIncreaseDelay(int mRetryIncreaseDelay) {
+    public R retryIncreaseDelay(int mRetryIncreaseDelay) {
         if (mRetryIncreaseDelay < 0)
             throw new IllegalArgumentException("retryIncreaseDelay must > 0");
         this.mRetryIncreaseDelay = mRetryIncreaseDelay;
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest certificates(InputStream... certificates) {
+    public R certificates(InputStream... certificates) {
         this.mSslParams = SSLUtil.getSslSocketFactory(null, null, certificates);
-        return this;
+       return (R) this;
     }
 
-    public BaseRequest certificates(InputStream bksFile, String password, InputStream... certificates) {
+    public R certificates(InputStream bksFile, String password, InputStream... certificates) {
         this.mSslParams = SSLUtil.getSslSocketFactory(bksFile, password, certificates);
-        return this;
+       return (R) this;
     }
 
     private OkHttpClient generateOkHttpClient() {
@@ -352,10 +353,10 @@ public abstract class BaseRequest {
         }
     }
 
-    protected BaseRequest build() {
+    protected R build() {
         mRetrofit = this.generateRetrofit();
         mApiManager = mRetrofit.create(ApiManager.class);
-        return this;
+        return (R) this;
     }
 
     protected abstract Observable<ResponseBody> generateRequest();
