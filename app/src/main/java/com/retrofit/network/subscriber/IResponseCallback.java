@@ -1,6 +1,5 @@
-package com.retrofit.network.subscribe;
+package com.retrofit.network.subscriber;
 
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
 public interface IResponseCallback<T> {

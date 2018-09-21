@@ -50,7 +50,7 @@ public class HttpConfigEntity implements Serializable {
     @Override
     public String toString() {
         return "ConfigEntity{" +
-                "context=" + context +
+                "mContext=" + context +
                 ", baseUrl='" + baseUrl + '\'' +
                 ", isLog=" + isLog +
                 ", isCookie=" + isCookie +

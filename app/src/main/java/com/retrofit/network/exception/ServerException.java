@@ -1,6 +1,6 @@
 package com.retrofit.network.exception;
 
-public class ServerException extends Exception {
+public class ServerException extends RuntimeException {
     private int code;
     private String msg;
 
@@ -11,7 +11,7 @@ public class ServerException extends Exception {
         this.code = code;
     }
 
-    public ServerException(String message, int code) {
+    public ServerException(int code, String message) {
         super(message);
         this.code = code;
         this.msg = message;

@@ -66,10 +66,10 @@ public class CacheInterceptor implements Interceptor {
         } */
 
     /*else {
-     *//*((Activity) context).runOnUiThread(new Runnable() {
+     *//*((Activity) mContext).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(context, R.string.load_cache, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, R.string.load_cache, Toast.LENGTH_SHORT).show();
                 }
             });*//*
             LogWraper.e("Novate", " no network load cache");

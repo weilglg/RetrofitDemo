@@ -12,8 +12,8 @@ import com.retrofit.network.cookie.SharedPrefsCookiePersistor;
 import com.retrofit.network.entity.HttpConfigEntity;
 import com.retrofit.network.exception.ExceptionFactory;
 import com.retrofit.network.interceptor.HeaderInterceptor;
-import com.retrofit.network.subscribe.ResponseCallback;
-import com.retrofit.network.subscribe.RxSubscribe;
+import com.retrofit.network.subscriber.ResponseCallback;
+import com.retrofit.network.subscriber.RxSubscribe;
 
 import java.io.File;
 import java.net.Proxy;
@@ -495,7 +495,7 @@ public class RxHttp_2 {
             }
 
             if (configEntity.context == null) {
-                throw new IllegalStateException("context required.");
+                throw new IllegalStateException("mContext required.");
             }
 
 

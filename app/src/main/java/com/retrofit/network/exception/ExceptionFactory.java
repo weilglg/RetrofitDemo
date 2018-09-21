@@ -32,17 +32,17 @@ public class ExceptionFactory {
     private static final int ACCESS_DENIED = 302;
     private static final int HANDEL_ERRROR = 417;
 
-    public static CommThrowable handleException(Throwable e) {
+    public static ApiThrowable handleException(Throwable e) {
         LogUtil.e("ExceptionFactory", e.getMessage());
         String detail = "";
         if (e.getCause() != null) {
             detail = e.getCause().getMessage();
         }
         LogUtil.e("ExceptionFactory", detail);
-        CommThrowable ex;
+        ApiThrowable ex;
         if (!(e instanceof ServerException) && e instanceof HttpException) {
             HttpException httpException = (HttpException) e;
-            ex = new CommThrowable(e, httpException.code());
+            ex = new ApiThrowable(e, httpException.code());
             switch (ex.getCode()) {
                 case UNAUTHORIZED:
                     ex.setMessage("未授权的请求");
@@ -79,7 +79,6 @@ public class ExceptionFactory {
                         ex.setMessage(e.getMessage());
                         break;
                     }
-
                     if (TextUtils.isEmpty(ex.getMessage()) && e.getLocalizedMessage() != null) {
                         ex.setMessage(e.getLocalizedMessage());
                         break;
@@ -92,7 +91,7 @@ public class ExceptionFactory {
             return ex;
         } else if (e instanceof ServerException) {
             ServerException resultException = (ServerException) e;
-            ex = new CommThrowable(resultException, resultException.getCode());
+            ex = new ApiThrowable(resultException, resultException.getCode());
             String errorMsg = ResultConfigLoader.errorDesc(resultException.getCode());
             if ("".equals(errorMsg)) {
                 ex.setMessage(errorMsg);
@@ -103,58 +102,58 @@ public class ExceptionFactory {
         } else if (e instanceof com.alibaba.fastjson.JSONException
                 || e instanceof JSONException
                 || e instanceof ParseException) {
-            ex = new CommThrowable(e, ERROR.PARSE_ERROR);
+            ex = new ApiThrowable(e, ERROR.PARSE_ERROR);
             ex.setMessage("解析错误");
             return ex;
         } else if (e instanceof ConnectException) {
-            ex = new CommThrowable(e, ERROR.NETWORD_ERROR);
+            ex = new ApiThrowable(e, ERROR.NETWORD_ERROR);
             ex.setMessage("连接失败");
             return ex;
         } else if (e instanceof SSLHandshakeException) {
-            ex = new CommThrowable(e, ERROR.SSL_ERROR);
+            ex = new ApiThrowable(e, ERROR.SSL_ERROR);
             ex.setMessage("证书验证失败");
             return ex;
         } else if (e instanceof CertPathValidatorException) {
             LogUtil.e("ExceptionFactory", e.getMessage());
-            ex = new CommThrowable(e, ERROR.SSL_NOT_FOUND);
+            ex = new ApiThrowable(e, ERROR.SSL_NOT_FOUND);
             ex.setMessage("证书路径没找到");
 
             return ex;
         } else if (e instanceof SSLPeerUnverifiedException) {
             LogUtil.e("ExceptionFactory", e.getMessage());
-            ex = new CommThrowable(e, ERROR.SSL_NOT_FOUND);
+            ex = new ApiThrowable(e, ERROR.SSL_NOT_FOUND);
             ex.setMessage("无有效的SSL证书");
             return ex;
 
         } else if (e instanceof ConnectTimeoutException) {
-            ex = new CommThrowable(e, ERROR.TIMEOUT_ERROR);
+            ex = new ApiThrowable(e, ERROR.TIMEOUT_ERROR);
             ex.setMessage("连接超时");
             return ex;
         } else if (e instanceof SocketTimeoutException) {
-            ex = new CommThrowable(e, ERROR.TIMEOUT_ERROR);
+            ex = new ApiThrowable(e, ERROR.TIMEOUT_ERROR);
             ex.setMessage("连接超时");
             return ex;
         } else if (e instanceof ClassCastException) {
-            ex = new CommThrowable(e, ERROR.FORMAT_ERROR);
+            ex = new ApiThrowable(e, ERROR.FORMAT_ERROR);
             ex.setMessage("类型转换出错");
             return ex;
         } else if (e instanceof NullPointerException) {
-            ex = new CommThrowable(e, ERROR.NULL);
+            ex = new ApiThrowable(e, ERROR.NULL);
             ex.setMessage("数据有空");
             return ex;
         } else if (e instanceof FormatException) {
             FormatException resultException = (FormatException) e;
-            ex = new CommThrowable(e, resultException.code);
+            ex = new ApiThrowable(e, resultException.code);
             ex.setMessage(resultException.message);
             return ex;
         } else if (e instanceof UnknownHostException) {
             LogUtil.e("ExceptionFactory", e.getMessage());
-            ex = new CommThrowable(e, NOT_FOUND);
+            ex = new ApiThrowable(e, NOT_FOUND);
             ex.setMessage("服务器地址未找到,请检查网络或Url");
             return ex;
         } else {
             LogUtil.e("ExceptionFactory", e.getMessage());
-            ex = new CommThrowable(e, ERROR.UNKNOWN);
+            ex = new ApiThrowable(e, ERROR.UNKNOWN);
             ex.setMessage(e.getMessage());
             return ex;
         }

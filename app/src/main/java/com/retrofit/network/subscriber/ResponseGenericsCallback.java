@@ -1,6 +1,6 @@
-package com.retrofit.network.subscribe;
+package com.retrofit.network.subscriber;
 
-import android.content.Context;
+import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -8,6 +8,7 @@ import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.CollectionCodec;
+import com.retrofit.network.RxHttp;
 import com.retrofit.network.config.ResultConfigLoader;
 import com.retrofit.network.exception.ServerException;
 
@@ -19,16 +20,14 @@ import okhttp3.ResponseBody;
 
 public abstract class ResponseGenericsCallback<T> extends ResponseCallback<T> {
 
-    private Context context;
-
-    public void setContext(Context context) {
-        this.context = context;
-        ResultConfigLoader.init(context);
+    protected ResponseGenericsCallback() {
+        ResultConfigLoader.init(RxHttp.getInstance().getContext());
     }
 
     @Override
     public T onTransformationResponse(Object tag, ResponseBody body) throws Exception {
-        String jsonStr = new String(body.bytes());
+        String jsonStr = "";
+        if (TextUtils.isEmpty(jsonStr)) throw new NullPointerException("body is null");
         JSONObject object = JSON.parseObject(jsonStr);
         String code = getCode(object);
         String msg = getMessage(object);
@@ -41,7 +40,7 @@ public abstract class ResponseGenericsCallback<T> extends ResponseCallback<T> {
                 if (params.length > 0) {
                     Type paramType = params[0];
                     if (paramType instanceof Class && String.class.isAssignableFrom((Class) paramType)) {
-                        return (T) new String(body.bytes());
+                        return (T) dataStr;
                     }
                     ObjectDeserializer deserializer = ParserConfig.getGlobalInstance().getDeserializer(paramType);
                     if (deserializer instanceof CollectionCodec) {
@@ -49,7 +48,7 @@ public abstract class ResponseGenericsCallback<T> extends ResponseCallback<T> {
                             JSONObject pageJson = JSON.parseObject(dataStr);
                             String pageDataStr = getDataStr(pageJson);
                             if ("[]".equals(pageDataStr) || pageDataStr == null || "".equals(pageDataStr)) {
-                                throw new NullPointerException("数据为空");
+                                throw new NullPointerException("result data is null");
                             }
                             dataStr = pageDataStr;
                         }
@@ -58,7 +57,7 @@ public abstract class ResponseGenericsCallback<T> extends ResponseCallback<T> {
                 }
             }
         }
-        throw new ServerException(Integer.valueOf(code));
+        throw new ServerException(Integer.valueOf(code), msg);
     }
 
     protected abstract boolean checkSuccessCode(int code, String msg);

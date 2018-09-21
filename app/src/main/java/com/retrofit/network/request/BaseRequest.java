@@ -30,6 +30,7 @@ import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.CallAdapter;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
@@ -60,7 +61,7 @@ public abstract class BaseRequest<R extends BaseRequest> {
     protected int mRetryIncreaseDelay;    //叠加延迟
     private List<Interceptor> mInterceptorList = new ArrayList<>();
     private List<Interceptor> mNetworkInterceptorList = new ArrayList<>();
-    private Context context;
+    protected Context mContext;
     private String mBaseUrl;
     private boolean isSign = false;
     private boolean accessToken = false;
@@ -71,7 +72,7 @@ public abstract class BaseRequest<R extends BaseRequest> {
 
     public BaseRequest(String url) {
         this.mUrl = url;
-        RxHttp rxHttp = RxHttp.getInstance();
+        this.mContext = RxHttp.getInstance().getContext();
         if (mBaseUrl == null && url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
             HttpUrl httpUrl = HttpUrl.parse(url);
             if (httpUrl != null)
@@ -86,159 +87,159 @@ public abstract class BaseRequest<R extends BaseRequest> {
 
     public R isAccessToken(boolean accessToken) {
         this.accessToken = accessToken;
-       return (R) this;
+        return (R) this;
     }
 
     public R isSyncRequest(boolean isSyncRequest) {
         this.isSyncRequest = isSyncRequest;
-       return (R) this;
+        return (R) this;
     }
 
 
     public R cache(Cache cache) {
         this.mCache = Util.checkNotNull(cache, "cache is null");
-       return (R) this;
+        return (R) this;
     }
 
     public R cacheFile(File cacheFile) {
         this.mCacheFile = Util.checkNotNull(cacheFile, "cacheFile is null");
-       return (R) this;
+        return (R) this;
     }
 
     public R okProxy(Proxy proxy) {
         this.mProxy = Util.checkNotNull(proxy, "proxy is null");
         ;
-       return (R) this;
+        return (R) this;
     }
 
     public R hostnameVerifier(HostnameVerifier hostnameVerifier) {
         this.mHostnameVerifier = Util.checkNotNull(hostnameVerifier, "hostnameVerifier is null");
-       return (R) this;
+        return (R) this;
     }
 
     public R converterFactory(Converter.Factory converterFactory) {
         this.mConverterFactory = Util.checkNotNull(converterFactory, "converterFactory is null");
-       return (R) this;
+        return (R) this;
     }
 
     public R callAdapterFactory(CallAdapter.Factory callAdapterFactory) {
         this.mCallAdapterFactory = Util.checkNotNull(callAdapterFactory, "callAdapterFactory is null");
-       return (R) this;
+        return (R) this;
     }
 
     public R sslSocketFactory(SSLSocketFactory sslSocketFactory) {
         this.mSslSocketFactory = Util.checkNotNull(sslSocketFactory, "sslSocketFactory is null");
-       return (R) this;
+        return (R) this;
     }
 
     public R trustManager(X509TrustManager trustManager) {
         this.mTrustManager = Util.checkNotNull(trustManager, "trustManager is null");
-       return (R) this;
+        return (R) this;
     }
 
     public R cookieJar(CookieJar cookieJar) {
         this.mCookieJar = Util.checkNotNull(cookieJar, "cookieJar is null");
-       return (R) this;
+        return (R) this;
     }
 
     public R connectionPool(ConnectionPool connectionPool) {
         this.mConnectionPool = Util.checkNotNull(connectionPool, "connectionPool is null");
-       return (R) this;
+        return (R) this;
     }
 
     public R headers(Map<String, String> headers) {
         this.mHeaders.putAll(Util.checkNotNull(headers, "headers is null"));
-       return (R) this;
+        return (R) this;
     }
 
     public R parameters(Map<String, String> parameters) {
         this.mParameters.putAll(Util.checkNotNull(parameters, "param is null"));
-       return (R) this;
+        return (R) this;
     }
 
     public R httpClient(OkHttpClient httpClient) {
         this.mHttpClient = Util.checkNotNull(httpClient, "OkHttpClient is null");
-       return (R) this;
+        return (R) this;
     }
 
     public R readTimeOut(int readTimeout) {
         if (mReadTimeout < 0)
             throw new IllegalArgumentException("readTimeout must > 0");
         this.mReadTimeout = readTimeout;
-       return (R) this;
+        return (R) this;
     }
 
     public R writeTimeOut(int writeTimeout) {
         if (mWriteTimeout < 0)
             throw new IllegalArgumentException("writeTimeout must > 0");
         this.mWriteTimeout = writeTimeout;
-       return (R) this;
+        return (R) this;
     }
 
     public R connectTimeOut(int connectTimeout) {
         if (mConnectTimeout < 0)
             throw new IllegalArgumentException("connectTimeout must > 0");
         this.mConnectTimeout = connectTimeout;
-       return (R) this;
+        return (R) this;
     }
 
     public R interceptorList(List<Interceptor> interceptorList) {
         this.mInterceptorList.addAll(Util.checkNotNull(interceptorList, "Interceptor is null"));
-       return (R) this;
+        return (R) this;
     }
 
     public R addInterceptor(Interceptor interceptor) {
         this.mInterceptorList.add(Util.checkNotNull(interceptor, "Interceptor is null"));
-       return (R) this;
+        return (R) this;
     }
 
     public R networkInterceptorList(List<Interceptor> networkInterceptorList) {
         this.mNetworkInterceptorList.addAll(Util.checkNotNull(networkInterceptorList, "NetworkInterceptor is null"));
-       return (R) this;
+        return (R) this;
     }
 
     public R addNetworkInterceptor(Interceptor interceptor) {
         this.mNetworkInterceptorList.add(Util.checkNotNull(interceptor, "NetworkInterceptor is null"));
-       return (R) this;
+        return (R) this;
     }
 
     public R isSign(boolean isSign) {
         this.isSign = isSign;
-       return (R) this;
+        return (R) this;
     }
 
     public R retryCount(int mRetryCount) {
         if (mRetryCount < 0)
             throw new IllegalArgumentException("retryIncreaseDelay must > 0");
         this.mRetryCount = mRetryCount;
-       return (R) this;
+        return (R) this;
     }
 
     public R retryDelay(int mRetryDelay) {
         if (mRetryDelay < 0)
             throw new IllegalArgumentException("retryIncreaseDelay must > 0");
         this.mRetryDelay = mRetryDelay;
-       return (R) this;
+        return (R) this;
     }
 
     public R retryIncreaseDelay(int mRetryIncreaseDelay) {
         if (mRetryIncreaseDelay < 0)
             throw new IllegalArgumentException("retryIncreaseDelay must > 0");
         this.mRetryIncreaseDelay = mRetryIncreaseDelay;
-       return (R) this;
+        return (R) this;
     }
 
     public R certificates(InputStream... certificates) {
         this.mSslParams = SSLUtil.getSslSocketFactory(null, null, certificates);
-       return (R) this;
+        return (R) this;
     }
 
     public R certificates(InputStream bksFile, String password, InputStream... certificates) {
         this.mSslParams = SSLUtil.getSslSocketFactory(bksFile, password, certificates);
-       return (R) this;
+        return (R) this;
     }
 
-    private OkHttpClient generateOkHttpClient() {
+    private OkHttpClient.Builder generateOkHttpClientBuilder() {
         if (mReadTimeout <= 0 && mWriteTimeout <= 0 && mConnectTimeout <= 0 && mSslParams == null
                 && mCookieJar == null && mCache == null && mCacheFile == null && mCacheMaxSize <= 0
                 && mInterceptorList.size() > 0 && mNetworkInterceptorList.size() > 0 && mProxy == null
@@ -250,7 +251,7 @@ public abstract class BaseRequest<R extends BaseRequest> {
                     ((BaseDynamicInterceptor) interceptor).sign(isSign).accessToken(accessToken);
                 }
             }
-            return builder.build();
+            return builder;
         } else {
             OkHttpClient.Builder builder = RxHttp.getInstance().getOkHttpClient().newBuilder();
 
@@ -277,7 +278,7 @@ public abstract class BaseRequest<R extends BaseRequest> {
                 builder.hostnameVerifier(mHostnameVerifier);
             }
             if (mCacheFile == null) {
-                mCacheFile = new File(context.getCacheDir(), "retrofit_http_cache");
+                mCacheFile = new File(mContext.getCacheDir(), "retrofit_http_cache");
             }
             if (mCache == null && mCacheFile != null) {
                 mCache = new Cache(mCacheFile, Math.max(5 * 1024 * 1024, mCacheMaxSize));
@@ -294,14 +295,6 @@ public abstract class BaseRequest<R extends BaseRequest> {
             if (mCookieJar != null) {
                 builder.cookieJar(mCookieJar);
             }
-            if (mHeaders.size() > 0) {
-                List<Interceptor> interceptors = builder.interceptors();
-                for (Interceptor interceptor : interceptors) {
-                    if (interceptor instanceof HeaderInterceptor) {
-                        ((HeaderInterceptor) interceptor).setMap(mHeaders);
-                    }
-                }
-            }
             if (mInterceptorList.size() > 0) {
                 for (Interceptor interceptor : mInterceptorList) {
                     builder.addInterceptor(interceptor);
@@ -310,7 +303,7 @@ public abstract class BaseRequest<R extends BaseRequest> {
             for (Interceptor interceptor : builder.interceptors()) {
                 if (interceptor instanceof BaseDynamicInterceptor) {
                     ((BaseDynamicInterceptor) interceptor).sign(isSign).accessToken(accessToken);
-                } else if (interceptor instanceof HeaderInterceptor) {
+                } else if (interceptor instanceof HeaderInterceptor && mHeaders.size() > 0) {
                     ((HeaderInterceptor) interceptor).setMap(mHeaders);
                 }
             }
@@ -319,20 +312,18 @@ public abstract class BaseRequest<R extends BaseRequest> {
                     builder.addNetworkInterceptor(interceptor);
                 }
             }
-            return builder.build();
+            return builder;
         }
 
     }
 
-    private Retrofit generateRetrofit() {
+    private Retrofit.Builder generateRetrofitBuilder() {
         RxHttp rxHttp = RxHttp.getInstance();
         if (mBaseUrl == null || mBaseUrl.equals(rxHttp.getBaseUrl()) && mConverterFactory == null
                 && mCallAdapterFactory == null && mHttpClient == null && rxHttp.getHttpClient() == null) {
-            return rxHttp.getRetrofit();
+            return rxHttp.getRetrofitBuilder();
         } else {
             Retrofit.Builder builder = rxHttp.getRetrofit().newBuilder();
-
-
             if (mBaseUrl != null) {
                 builder.baseUrl(mBaseUrl);
             }
@@ -342,19 +333,22 @@ public abstract class BaseRequest<R extends BaseRequest> {
             if (mConverterFactory != null) {
                 builder.addConverterFactory(mConverterFactory);
             }
-            if (mHttpClient != null) {
-                builder.client(mHttpClient);
-            } else if (rxHttp.getHttpClient() != null) {
-                builder.client(rxHttp.getHttpClient());
-            } else {
-                builder.client(generateOkHttpClient());
-            }
-            return builder.build();
+
+            return builder;
         }
     }
 
     protected R build() {
-        mRetrofit = this.generateRetrofit();
+        OkHttpClient.Builder okHttpClientBuilder = generateOkHttpClientBuilder();
+        Retrofit.Builder retrofitBuilder = generateRetrofitBuilder();
+        if (mHttpClient != null) {
+            retrofitBuilder.client(mHttpClient);
+        } else if (RxHttp.getInstance().getHttpClient() != null) {
+            retrofitBuilder.client(RxHttp.getInstance().getHttpClient());
+        } else {
+            retrofitBuilder.client(okHttpClientBuilder.build());
+        }
+        mRetrofit = retrofitBuilder.build();
         mApiManager = mRetrofit.create(ApiManager.class);
         return (R) this;
     }

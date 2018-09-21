@@ -2,7 +2,7 @@ package com.retrofit.network.func;
 
 import android.support.annotation.NonNull;
 
-import com.retrofit.network.exception.CommThrowable;
+import com.retrofit.network.exception.ApiThrowable;
 import com.retrofit.network.exception.ExceptionFactory;
 import com.retrofit.network.util.LogUtil;
 
@@ -52,15 +52,14 @@ public class RetryExceptionFunc implements Function<Observable<? extends Throwab
                 if (wrapper.index > 1)
                     LogUtil.i("重试次数：" + (wrapper.index));
                 int errCode = 0;
-                if (wrapper.throwable instanceof CommThrowable) {
-                    CommThrowable exception = (CommThrowable) wrapper.throwable;
+                if (wrapper.throwable instanceof ApiThrowable) {
+                    ApiThrowable exception = (ApiThrowable) wrapper.throwable;
                     errCode = exception.getCode();
                 }
                 if ((wrapper.throwable instanceof ConnectException
                         || wrapper.throwable instanceof SocketTimeoutException
                         || errCode == ExceptionFactory.ERROR.NETWORD_ERROR
                         || errCode == ExceptionFactory.ERROR.TIMEOUT_ERROR
-                        || wrapper.throwable instanceof SocketTimeoutException
                         || wrapper.throwable instanceof TimeoutException)
                         && wrapper.index < count + 1) { //如果超出重试次数也抛出错误，否则默认是会进入onCompleted
                     return Observable.timer(delay + (wrapper.index - 1) * increaseDelay, TimeUnit.MILLISECONDS);

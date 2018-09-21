@@ -1,9 +1,9 @@
-package com.retrofit.network.subscribe;
+package com.retrofit.network.subscriber;
 
 import android.content.Context;
 
+import com.retrofit.network.exception.ApiThrowable;
 import com.retrofit.network.util.LogUtil;
-import com.retrofit.network.exception.CommThrowable;
 import com.retrofit.network.exception.ExceptionFactory;
 
 import java.lang.ref.WeakReference;
@@ -11,14 +11,14 @@ import java.lang.ref.WeakReference;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.observers.DisposableObserver;
 
-public abstract class BaseSubscribe<T> extends DisposableObserver<T> {
+public abstract class BaseSubscriber<T> extends DisposableObserver<T> {
 
     public WeakReference<Context> contextWeakReference;
 
-    public BaseSubscribe() {
+    public BaseSubscriber() {
     }
 
-    public BaseSubscribe(Context context) {
+    public BaseSubscriber(Context context) {
         this.contextWeakReference = new WeakReference<>(context);
     }
 
@@ -48,10 +48,10 @@ public abstract class BaseSubscribe<T> extends DisposableObserver<T> {
         } else {
             LogUtil.v("RxHttp", "Throwable  || Message == Null");
         }
-        if (e instanceof CommThrowable) {
-            LogUtil.e("RxHttp", "--> e instanceof CommThrowable");
+        if (e instanceof ApiThrowable) {
+            LogUtil.e("RxHttp", "--> e instanceof ApiThrowable");
             LogUtil.e("RxHttp", "--> " + e.getCause().toString());
-            onError((CommThrowable) e);
+            onError((ApiThrowable) e);
         } else {
             LogUtil.e("RxHttp", "e !instanceof Throwable");
             String detail = "";
@@ -69,7 +69,7 @@ public abstract class BaseSubscribe<T> extends DisposableObserver<T> {
         LogUtil.v("RxHttp", "-->http is Complete");
     }
 
-    public abstract void onError(CommThrowable throwable);
+    public abstract void onError(ApiThrowable throwable);
 
 
 }

@@ -1,9 +1,10 @@
 {
-  "codeKey": "code",
-  "msgKey": "retDesc",
+  "codeKey": "status",
+  "msgKey": "msg",
   "dataKey": [
     "rspBody",
-    "resultData"
+    "resultData",
+    "results"
   ],
   "successCode": [
     "0000000",

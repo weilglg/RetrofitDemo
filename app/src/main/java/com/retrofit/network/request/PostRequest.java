@@ -1,28 +1,35 @@
 package com.retrofit.network.request;
 
-import android.nfc.Tag;
-
+import com.retrofit.network.func.HandleErrorFunc;
 import com.retrofit.network.func.RetryExceptionFunc;
-import com.retrofit.network.subscribe.CallBackSubsciber;
-import com.retrofit.network.subscribe.ResponseCallback;
-import com.retrofit.network.subscribe.RxSubscribe;
+import com.retrofit.network.subscriber.ResponseCallback;
+import com.retrofit.network.subscriber.RxCallbackSubscriber;
+import com.retrofit.network.transformer.HandleErrorTransformer;
+import com.retrofit.network.transformer.HandleResponseBodyTransformer;
 import com.retrofit.network.util.RxUtil;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.ObservableTransformer;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
+import okhttp3.ResponseBody;
 
+@SuppressWarnings(value = {"unchecked", "deprecation"})
 public class PostRequest extends HttpBodyRequest<PostRequest> {
 
     public PostRequest(String url) {
         super(url);
     }
 
-    public <T> Disposable post(Object tag, ResponseCallback<T> callback) {
-        Observable<T> observable = build().generateObservable(generateRequest(), callback);
-        return observable.subscribeWith(new CallBackSubsciber<T>(callback, tag));
+    public <T> Disposable execute(final Object tag, final ResponseCallback<T> callback) {
+        Observable<ResponseBody> observable = build().generateObservable(generateRequest());
+        return observable.compose(new HandleResponseBodyTransformer<T>(callback, tag))
+                .compose(new HandleErrorTransformer<T>())
+                .subscribeWith(new RxCallbackSubscriber<T>(mContext, tag, callback));
     }
 
-    public <T> Observable<T> generateObservable(Observable observable, ResponseCallback<T> callback) {
+    private  Observable<ResponseBody> generateObservable(Observable observable) {
         return observable.compose(isSyncRequest ? RxUtil._main() : RxUtil._io_main())
                 .retryWhen(new RetryExceptionFunc(mRetryCount, mRetryDelay, mRetryIncreaseDelay));
     }

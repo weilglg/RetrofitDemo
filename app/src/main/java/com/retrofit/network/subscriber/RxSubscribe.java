@@ -1,11 +1,11 @@
-package com.retrofit.network.subscribe;
+package com.retrofit.network.subscriber;
 
-import com.retrofit.network.exception.CommThrowable;
+import com.retrofit.network.exception.ApiThrowable;
 import com.retrofit.network.exception.ExceptionFactory;
 
 import okhttp3.ResponseBody;
 
-public class RxSubscribe<T> extends BaseSubscribe<ResponseBody> {
+public class RxSubscribe<T> extends BaseSubscriber<ResponseBody> {
 
     private ResponseCallback<T> callback;
     private Object tag = null;
@@ -46,12 +46,11 @@ public class RxSubscribe<T> extends BaseSubscribe<ResponseBody> {
     }
 
     @Override
-    public void onError(CommThrowable throwable) {
+    public void onError(ApiThrowable throwable) {
         if (callback != null) {
             callback.onError(tag, throwable);
         }
     }
-
 
 
 }

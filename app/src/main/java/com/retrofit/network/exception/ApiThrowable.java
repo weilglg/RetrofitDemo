@@ -1,15 +1,15 @@
 package com.retrofit.network.exception;
 
-public class CommThrowable extends Exception {
+public class ApiThrowable extends Exception {
     private int code;
     private String message;
 
-    public CommThrowable(java.lang.Throwable throwable, int code) {
+    public ApiThrowable(java.lang.Throwable throwable, int code) {
         super(throwable);
         this.code = code;
     }
 
-    public CommThrowable(java.lang.Throwable throwable, int code, String message) {
+    public ApiThrowable(java.lang.Throwable throwable, int code, String message) {
         super(throwable);
         this.code = code;
         this.message = message;

@@ -1,14 +1,9 @@
-package com.retrofit.network.subscribe;
+package com.retrofit.network.subscriber;
 
 import android.os.Handler;
 import android.os.Looper;
 
-import com.retrofit.network.exception.CommThrowable;
-
-
-import java.lang.reflect.ParameterizedType;
-
-import okhttp3.ResponseBody;
+import com.retrofit.network.exception.ApiThrowable;
 
 public abstract class ResponseCallback<T> implements IResponseCallback<T> {
 
@@ -44,7 +39,7 @@ public abstract class ResponseCallback<T> implements IResponseCallback<T> {
 
     }
 
-    protected abstract void onError(Object tag, CommThrowable throwable);
+    protected abstract void onError(Object tag, ApiThrowable throwable);
 
     protected abstract void onSuccess(Object tag, T result);
 

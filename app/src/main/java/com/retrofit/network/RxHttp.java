@@ -4,6 +4,7 @@ package com.retrofit.network;
 import android.content.Context;
 
 import com.retrofit.network.interceptor.HeaderInterceptor;
+import com.retrofit.network.request.PostRequest;
 import com.retrofit.network.util.LogUtil;
 import com.retrofit.network.util.SSLUtil;
 
@@ -34,7 +35,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 public class RxHttp {
 
     private static final String TAG = RxHttp.class.getSimpleName();
-    public static final int DEFAULT_MILLISECONDS = 60000;             //默认的超时时间
+    public static final int DEFAULT_MILLISECONDS = 30;             //默认的超时时间
     private static final int DEFAULT_RETRY_COUNT = 3;                 //默认重试次数
     private static final int DEFAULT_RETRY_INCREASEDELAY = 0;         //默认重试叠加时间
     private static final int DEFAULT_RETRY_DELAY = 500;               //默认重试延时
@@ -76,16 +77,17 @@ public class RxHttp {
     private boolean accessToken = false;
     private boolean isSyncRequest = false;
 
-    public void init(Context context) {
+    public RxHttp init(Context context) {
         this.context = context;
+        return this;
     }
 
 
     private RxHttp() {
         okHttpClientBuilder = new OkHttpClient.Builder();
-        okHttpClientBuilder.connectTimeout(DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS);
-        okHttpClientBuilder.readTimeout(DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS);
-        okHttpClientBuilder.writeTimeout(DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS);
+        okHttpClientBuilder.connectTimeout(DEFAULT_MILLISECONDS, TimeUnit.SECONDS);
+        okHttpClientBuilder.readTimeout(DEFAULT_MILLISECONDS, TimeUnit.SECONDS);
+        okHttpClientBuilder.writeTimeout(DEFAULT_MILLISECONDS, TimeUnit.SECONDS);
         retrofitBuilder = new Retrofit.Builder();
         retrofitBuilder.addCallAdapterFactory(RxJava2CallAdapterFactory.create());//增加RxJava2CallAdapterFactory
     }
@@ -105,31 +107,46 @@ public class RxHttp {
         return baseUrl;
     }
 
+    /**
+     * 全局设置访问域
+     */
     public RxHttp baseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
         retrofitBuilder.baseUrl(Util.checkNotNull(baseUrl, "OkHttpClient is null"));
         return this;
     }
 
+    /**
+     * 全局设置自定义OkHttpClient
+     */
     public RxHttp OkHttpClient(OkHttpClient okHttpClient) {
         retrofitBuilder.client(Util.checkNotNull(okHttpClient, "OkHttpClient is null"));
         return this;
     }
 
+    /**
+     * 全局设置日志输出
+     */
     public RxHttp isLog(boolean log) {
         LogUtil.setDebug(log);
         if (log) {
-            addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS));
-            addNetworkInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY));
+            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
+            addInterceptor(httpLoggingInterceptor);
         }
         return this;
     }
 
+    /**
+     * 添加全局网络拦截器
+     */
     private RxHttp addNetworkInterceptor(Interceptor interceptor) {
         okHttpClientBuilder.addInterceptor(Util.checkNotNull(interceptor, "interceptor is null"));
         return this;
     }
 
+    /**
+     * 全局拦截器
+     */
     private RxHttp addInterceptor(Interceptor interceptor) {
         okHttpClientBuilder.addInterceptor(Util.checkNotNull(interceptor, "interceptor is null"));
         return this;
@@ -348,5 +365,9 @@ public class RxHttp {
     private void testInitialize() {
         if (this.context == null)
             throw new ExceptionInInitializerError("请先在全局Application中调用 RxHttp.getInstance().init() 初始化！");
+    }
+
+    public PostRequest post(String url) {
+        return new PostRequest(url);
     }
 }
