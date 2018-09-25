@@ -4,7 +4,8 @@ import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.retrofit.network.Util;
+import com.retrofit.network.UploadFileType;
+import com.retrofit.network.util.Util;
 
 import io.reactivex.Observable;
 import okhttp3.MediaType;
@@ -21,11 +22,16 @@ public class HttpBodyRequest<R extends BaseRequest> extends BaseRequest<R> {
     private String mStr;
     private Object mObject;
     private MediaType mMediaType;
+    private UploadFileType mUploadType;
 
     public HttpBodyRequest(String url) {
         super(url);
     }
 
+    public R uploadFileType(UploadFileType type) {
+        this.mUploadType = type;
+        return (R) this;
+    }
 
     public R requestBody(RequestBody requestBody) {
         this.mRequestBody = requestBody;
@@ -89,7 +95,20 @@ public class HttpBodyRequest<R extends BaseRequest> extends BaseRequest<R> {
             return mApiManager.postBody(mUrl, Util.createBytes(mBytes));
         } else if (mObject != null) {
             return mApiManager.postBody(mUrl, mObject);
+        } else if (mUploadType == UploadFileType.PART) {
+            return uploadFilesWithParts();
+        } else if (mUploadType == UploadFileType.BODY) {
+            return uploadFilesWithBodys();
+        } else {
+            return mApiManager.post(mUrl);
         }
+    }
+
+    private Observable<ResponseBody> uploadFilesWithBodys() {
+        return null;
+    }
+
+    private Observable<ResponseBody> uploadFilesWithParts() {
         return null;
     }
 

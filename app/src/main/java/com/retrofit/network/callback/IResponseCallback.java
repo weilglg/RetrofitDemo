@@ -1,4 +1,4 @@
-package com.retrofit.network.subscriber;
+package com.retrofit.network.callback;
 
 import okhttp3.ResponseBody;
 

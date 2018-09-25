@@ -1,6 +1,6 @@
 package com.retrofit.network.transformer;
 
-import com.retrofit.network.subscriber.ResponseCallback;
+import com.retrofit.network.callback.ResponseCallback;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;

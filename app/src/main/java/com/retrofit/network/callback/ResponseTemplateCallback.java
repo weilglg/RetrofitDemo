@@ -1,4 +1,4 @@
-package com.retrofit.network.subscriber;
+package com.retrofit.network.callback;
 
 import android.text.TextUtils;
 
@@ -18,15 +18,26 @@ import java.util.List;
 
 import okhttp3.ResponseBody;
 
-public abstract class ResponseGenericsCallback<T> extends ResponseCallback<T> {
+/**
+ * 返回的数据格式是统一的并且只需要处理需要的数据
+ * 例如：{"code":"0",
+ * "msg":"成功",
+ * "data":{
+ * "name"："xxxx"
+ * }
+ * }
+ */
 
-    protected ResponseGenericsCallback() {
+@SuppressWarnings(value = {"unchecked", "deprecation"})
+public abstract class ResponseTemplateCallback<T> extends ResponseCallback<T> {
+
+    protected ResponseTemplateCallback() {
         ResultConfigLoader.init(RxHttp.getInstance().getContext());
     }
 
     @Override
     public T onTransformationResponse(Object tag, ResponseBody body) throws Exception {
-        String jsonStr = "";
+        String jsonStr = body.string();
         if (TextUtils.isEmpty(jsonStr)) throw new NullPointerException("body is null");
         JSONObject object = JSON.parseObject(jsonStr);
         String code = getCode(object);
@@ -60,7 +71,9 @@ public abstract class ResponseGenericsCallback<T> extends ResponseCallback<T> {
         throw new ServerException(Integer.valueOf(code), msg);
     }
 
-    protected abstract boolean checkSuccessCode(int code, String msg);
+    public boolean checkSuccessCode(int code, String msg) {
+        return true;
+    }
 
     private String getCode(JSONObject object) {
         String codeKey = ResultConfigLoader.getCodeKey();

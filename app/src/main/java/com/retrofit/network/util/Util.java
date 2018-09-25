@@ -1,4 +1,4 @@
-package com.retrofit.network;
+package com.retrofit.network.util;
 
 import android.support.annotation.NonNull;
 

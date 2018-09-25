@@ -8,9 +8,11 @@ import android.view.View;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.support.retrofit.Retrofit2ConverterFactory;
 import com.retrofit.network.RxHttp;
+import com.retrofit.network.callback.ResponseGenericsCallback;
+import com.retrofit.network.callback.ResponseStringCallback;
+import com.retrofit.network.callback.ResponseTemplateCallback;
 import com.retrofit.network.config.ResultConfigLoader;
 import com.retrofit.network.exception.ApiThrowable;
-import com.retrofit.network.subscriber.ResponseGenericsCallback;
 import com.retrofit.network.util.LogUtil;
 
 import io.reactivex.Observable;
@@ -37,33 +39,30 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.tv2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Observable.just(1, 2, 3).onErrorResumeNext(new Function<Throwable, ObservableSource<? extends Integer>>() {
+                JSONObject param = new JSONObject();
+                param.put("pageSize", 1);
+                param.put("pageNum", 10);
+                RxHttp.getInstance().init(getBaseContext())
+                        .baseUrl("https://ygzk.ygego.cn/api/")
+                        .isLog(true)
+                        .callAdapterFactory(RxJava2CallAdapterFactory.create())
+                        .converterFactory(new Retrofit2ConverterFactory())
+                        .post("home/hotnews")
+                        .jsonObj(param)
+                        .execute(String.class).subscribeWith(new DisposableObserver<String>() {
                     @Override
-                    public ObservableSource<? extends Integer> apply(Throwable throwable) throws Exception {
-                        return null;
-                    }
-                }).flatMap(new Function<Integer, ObservableSource<?>>() {
-                    @Override
-                    public ObservableSource<?> apply(Integer i) throws Exception {
-                        if (i == 2) {
-                            return Observable.error(new NullPointerException());
-                        }
-                        return Observable.just(i);
-                    }
-                }).subscribeWith(new DisposableObserver() {
-                    @Override
-                    public void onNext(Object o) {
-                        Log.e("TAG", "----------onNext-------");
+                    public void onNext(String s) {
+                        LogUtil.e("MainActivity", "result=" + s);
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e("TAG", "--------onError-------");
+                        LogUtil.e("MainActivity", "onError=" + e);
                     }
 
                     @Override
                     public void onComplete() {
-                        Log.e("TAG", "--------onComplete-------");
+
                     }
                 });
             }
@@ -81,21 +80,45 @@ public class MainActivity extends AppCompatActivity {
                 .converterFactory(new Retrofit2ConverterFactory())
                 .post("home/hotnews")
                 .jsonObj(param)
-                .execute("cccc", new ResponseGenericsCallback<String>() {
+                .execute("CCCC", new ResponseTemplateCallback<String>() {
+
                     @Override
-                    protected void onError(Object tag, ApiThrowable throwable) {
-                        LogUtil.e("MainActivity", "throwable=" + throwable.toString());
+                    public boolean checkSuccessCode(int code, String msg) {
+                        return false;
                     }
 
                     @Override
-                    protected void onSuccess(Object tag, String result) {
+                    public void onStart(Object tag) {
+                        LogUtil.e("MainActivity", "onStart");
+                    }
+
+                    @Override
+                    public void onSuccess(Object tag, String result) {
                         LogUtil.e("MainActivity", "result=" + result);
                     }
 
                     @Override
-                    protected boolean checkSuccessCode(int code, String msg) {
-                        return code == 0;
+                    public void onCompleted(Object tag) {
+
+                    }
+
+                    @Override
+                    public void onError(Object tag, ApiThrowable throwable) {
+                        Log.e("tag", "onError=" + throwable.getMessage());
                     }
                 });
+
+
+//                .execute("cccc", new ResponseGenericsCallback<String>() {
+//                    @Override
+//                    public void onError(Object tag, ApiThrowable throwable) {
+//                        LogUtil.e("MainActivity", "throwable=" + throwable.toString());
+//                    }
+//
+//                    @Override
+//                    public void onSuccess(Object tag, String result) {
+//                        LogUtil.e("MainActivity", "result=" + result);
+//                    }
+//                });
     }
 }

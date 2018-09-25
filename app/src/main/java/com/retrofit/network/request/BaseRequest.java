@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.retrofit.network.ApiManager;
 import com.retrofit.network.RxHttp;
-import com.retrofit.network.Util;
+import com.retrofit.network.util.Util;
 import com.retrofit.network.interceptor.BaseDynamicInterceptor;
 import com.retrofit.network.interceptor.HeaderInterceptor;
 import com.retrofit.network.util.SSLUtil;
@@ -30,7 +30,6 @@ import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.CallAdapter;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
@@ -68,6 +67,7 @@ public abstract class BaseRequest<R extends BaseRequest> {
     protected boolean isSyncRequest = false;
     private Retrofit mRetrofit;
     protected ApiManager mApiManager;
+    private boolean isOperationHeader = false;
 
 
     public BaseRequest(String url) {
@@ -148,7 +148,19 @@ public abstract class BaseRequest<R extends BaseRequest> {
     }
 
     public R headers(Map<String, String> headers) {
+        isOperationHeader = true;
         this.mHeaders.putAll(Util.checkNotNull(headers, "headers is null"));
+        return (R) this;
+    }
+
+    public R addHeader(String key, String value){
+        this.mHeaders.put(key, value);
+        isOperationHeader = true;
+        return (R) this;
+    }
+
+    public R removeHeader(String key){
+        isOperationHeader = true;
         return (R) this;
     }
 
@@ -239,6 +251,11 @@ public abstract class BaseRequest<R extends BaseRequest> {
         return (R) this;
     }
 
+    public R cacheMaxSize(long cacheMaxSize){
+        this.mCacheMaxSize = cacheMaxSize;
+        return (R) this;
+    }
+
     private OkHttpClient.Builder generateOkHttpClientBuilder() {
         if (mReadTimeout <= 0 && mWriteTimeout <= 0 && mConnectTimeout <= 0 && mSslParams == null
                 && mCookieJar == null && mCache == null && mCacheFile == null && mCacheMaxSize <= 0
@@ -254,7 +271,6 @@ public abstract class BaseRequest<R extends BaseRequest> {
             return builder;
         } else {
             OkHttpClient.Builder builder = RxHttp.getInstance().getOkHttpClient().newBuilder();
-
             if (mReadTimeout > 0) {
                 builder.readTimeout(mReadTimeout, TimeUnit.SECONDS);
             }

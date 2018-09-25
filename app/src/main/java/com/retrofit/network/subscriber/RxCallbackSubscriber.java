@@ -2,6 +2,7 @@ package com.retrofit.network.subscriber;
 
 import android.content.Context;
 
+import com.retrofit.network.callback.ResponseCallback;
 import com.retrofit.network.exception.ApiThrowable;
 
 public class RxCallbackSubscriber<T> extends BaseSubscriber<T> {

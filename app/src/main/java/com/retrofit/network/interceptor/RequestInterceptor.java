@@ -1,4 +1,4 @@
-package com.retrofit.network;
+package com.retrofit.network.interceptor;
 
 import android.support.annotation.NonNull;
 
@@ -10,10 +10,10 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-class RequestInterceptor implements Interceptor {
+public class RequestInterceptor implements Interceptor {
     private Object tag;
 
-    RequestInterceptor(Object tag) {
+    public RequestInterceptor(Object tag) {
         this.tag = tag;
     }
 

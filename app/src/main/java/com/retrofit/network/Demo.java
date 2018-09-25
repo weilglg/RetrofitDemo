@@ -2,30 +2,50 @@ package com.retrofit.network;
 
 public class Demo {
 
-    private String name;
-    private String pwd;
+    private String status;
+    private String msg;
+    private String results;
+    private boolean success;
 
-    public String getName() {
-        return name;
+    public String getStatus() {
+        return status;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public String getPwd() {
-        return pwd;
+    public String getMsg() {
+        return msg;
     }
 
-    public void setPwd(String pwd) {
-        this.pwd = pwd;
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public String getResults() {
+        return results;
+    }
+
+    public void setResults(String results) {
+        this.results = results;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 
     @Override
     public String toString() {
         return "Demo{" +
-                "name='" + name + '\'' +
-                ", pwd='" + pwd + '\'' +
+                "status='" + status + '\'' +
+                ", msg='" + msg + '\'' +
+                ", results='" + results + '\'' +
+                ", success=" + success +
                 '}';
     }
 }

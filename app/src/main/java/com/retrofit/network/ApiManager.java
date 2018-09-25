@@ -15,18 +15,20 @@ import retrofit2.http.Url;
 public interface ApiManager {
 
     @POST()
-    Observable<ResponseBody> postBody(@Url String mUrl, @Body RequestBody mRequestBody);
+    Observable<ResponseBody> postBody(@Url String url, @Body RequestBody mRequestBody);
 
     @POST()
-    Observable<ResponseBody> postBody(@Url String mUrl, @Body Object object);
-
-    @POST()
-    @Headers({"Content-Type: application/json", "Accept: application/json"})
-    Observable<ResponseBody> potJsonStr(@Url String mUrl, @Body RequestBody json);
+    Observable<ResponseBody> postBody(@Url String url, @Body Object object);
 
     @POST()
     @Headers({"Content-Type: application/json", "Accept: application/json"})
-    Observable<ResponseBody> postJson(@Url String mUrl, @Body Object object);
+    Observable<ResponseBody> potJsonStr(@Url String url, @Body RequestBody json);
+
+    @POST()
+    @Headers({"Content-Type: application/json", "Accept: application/json"})
+    Observable<ResponseBody> postJson(@Url String url, @Body Object object);
+
+    Observable<ResponseBody> post(@Url String url);
 
 //    @POST()
 //    @Headers({"Content-Type: application/json", "Accept: application/json"})

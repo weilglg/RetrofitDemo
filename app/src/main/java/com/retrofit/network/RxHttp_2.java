@@ -6,14 +6,18 @@ import android.content.Context;
 import android.util.Log;
 
 import com.alibaba.fastjson.support.retrofit.Retrofit2ConverterFactory;
+import com.retrofit.network.callback.ResponseCallback;
 import com.retrofit.network.cookie.CookieCacheImpl;
 import com.retrofit.network.cookie.CookieManager;
 import com.retrofit.network.cookie.SharedPrefsCookiePersistor;
 import com.retrofit.network.entity.HttpConfigEntity;
 import com.retrofit.network.exception.ExceptionFactory;
+import com.retrofit.network.interceptor.CacheInterceptor;
+import com.retrofit.network.interceptor.CacheInterceptorOffline;
 import com.retrofit.network.interceptor.HeaderInterceptor;
-import com.retrofit.network.subscriber.ResponseCallback;
+import com.retrofit.network.interceptor.RequestInterceptor;
 import com.retrofit.network.subscriber.RxSubscribe;
+import com.retrofit.network.util.Util;
 
 import java.io.File;
 import java.net.Proxy;

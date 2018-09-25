@@ -1,12 +1,11 @@
 package com.retrofit.network.interceptor;
 
-import com.retrofit.network.Util;
+import com.retrofit.network.util.Util;
 import com.retrofit.network.util.LogUtil;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

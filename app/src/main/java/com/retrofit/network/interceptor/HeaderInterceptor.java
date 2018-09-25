@@ -26,6 +26,18 @@ public class HeaderInterceptor implements Interceptor {
         this.map.putAll(map);
     }
 
+    public void clearAll() {
+        if (this.map != null) {
+            this.map.clear();
+        }
+    }
+
+    public void remove(String key) {
+        if (this.map != null && map.containsKey(key)) {
+            this.map.remove(key);
+        }
+    }
+
     @Override
     public Response intercept(@NonNull Chain chain) throws IOException {
         Request.Builder builder = chain.request().newBuilder();

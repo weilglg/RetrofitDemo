@@ -7,6 +7,7 @@ import com.retrofit.network.interceptor.HeaderInterceptor;
 import com.retrofit.network.request.PostRequest;
 import com.retrofit.network.util.LogUtil;
 import com.retrofit.network.util.SSLUtil;
+import com.retrofit.network.util.Util;
 
 import java.io.File;
 import java.io.InputStream;
@@ -137,63 +138,97 @@ public class RxHttp {
     }
 
     /**
-     * 添加全局网络拦截器
+     * 全局网络拦截器
      */
-    private RxHttp addNetworkInterceptor(Interceptor interceptor) {
-        okHttpClientBuilder.addInterceptor(Util.checkNotNull(interceptor, "interceptor is null"));
+    public RxHttp addNetworkInterceptor(Interceptor interceptor) {
+        networkInterceptorList.add(Util.checkNotNull(interceptor, "interceptor is null"));
         return this;
     }
 
     /**
      * 全局拦截器
      */
-    private RxHttp addInterceptor(Interceptor interceptor) {
-        okHttpClientBuilder.addInterceptor(Util.checkNotNull(interceptor, "interceptor is null"));
+    public RxHttp addInterceptor(Interceptor interceptor) {
+        interceptorList.add(Util.checkNotNull(interceptor, "interceptor is null"));
         return this;
     }
 
+    /**
+     * 全局缓存
+     */
     public RxHttp cache(Cache cache) {
         okHttpClientBuilder.cache(Util.checkNotNull(cache, "cache is null"));
         return this;
     }
 
+    /**
+     * 缓存文件大小
+     */
     public RxHttp cacheMaxSize(long cacheMaxSize) {
         this.mCacheMaxSize = mCacheMaxSize;
         return this;
     }
 
+    /**
+     * 全局缓存文件
+     */
     public RxHttp cacheFile(File cacheFile) {
         Cache cache = new Cache(Util.checkNotNull(cacheFile, "cacheFile is null"), Math.max(5 * 1024 * 1024, mCacheMaxSize));
         return cache(cache);
     }
 
+    /**
+     * 全局OkHttp的代理
+     */
     public RxHttp okProxy(Proxy proxy) {
         okHttpClientBuilder.proxy(proxy);
         return this;
     }
 
-
+    /**
+     * https的全局访问规则
+     */
     public RxHttp hostnameVerifier(HostnameVerifier hostnameVerifier) {
         okHttpClientBuilder.hostnameVerifier(Util.checkNotNull(hostnameVerifier, "HostnameVerifier is null"));
         return this;
     }
 
+    /**
+     * 全局设置Converter.Factory
+     */
     public RxHttp converterFactory(Converter.Factory converterFactory) {
         retrofitBuilder.addConverterFactory(Util.checkNotNull(converterFactory, "Converter.Factory is null"));
         return this;
     }
 
+    /**
+     * 全局设置CallAdapter.Factory,默认RxJavaCallAdapterFactory.create()
+     */
     public RxHttp callAdapterFactory(CallAdapter.Factory callAdapterFactory) {
         retrofitBuilder.addCallAdapterFactory(Util.checkNotNull(callAdapterFactory, "CallAdapter.Factory is null"));
         return this;
     }
 
+    /**
+     * 全局设置Retrofit对象Factory
+     */
+    public RxHttp setCallFactory(okhttp3.Call.Factory factory) {
+        retrofitBuilder.callFactory(Util.checkNotNull(factory, "factory == null"));
+        return this;
+    }
+
+    /**
+     * https的全局自签名证书
+     */
     public RxHttp certificates(InputStream... certificates) {
         SSLUtil.SSLParams sslParams = SSLUtil.getSslSocketFactory(null, null, certificates);
         okHttpClientBuilder.sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
         return this;
     }
 
+    /**
+     * https双向认证证书
+     */
     public RxHttp certificates(InputStream bksFile, String password, InputStream... certificates) {
         SSLUtil.SSLParams sslParams = SSLUtil.getSslSocketFactory(bksFile, password, certificates);
         okHttpClientBuilder.sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
@@ -211,11 +246,17 @@ public class RxHttp {
         return this;
     }
 
+    /**
+     * 全局cookie存取规则
+     */
     public RxHttp cookieJar(CookieJar cookieJar) {
         okHttpClientBuilder.cookieJar(cookieJar);
         return this;
     }
 
+    /**
+     * 全局设置请求的连接池
+     */
     public RxHttp connectionPool(ConnectionPool connectionPool) {
         okHttpClientBuilder.connectionPool(connectionPool);
         return this;
@@ -225,11 +266,17 @@ public class RxHttp {
         return headers;
     }
 
+    /**
+     * 全局设置请求头
+     */
     public RxHttp headers(Map<String, String> headers) {
         this.headers.putAll(headers);
         return this;
     }
 
+    /**
+     * 添加全局公共请求参数
+     */
     public RxHttp addHeader(String key, String value) {
         this.headers.put(key, value);
         return this;
@@ -253,22 +300,33 @@ public class RxHttp {
         return httpClient;
     }
 
+    /**
+     * 全局为Retrofit设置自定义的OkHttpClient
+     */
     public RxHttp httpClient(OkHttpClient httpClient) {
         this.httpClient = httpClient;
         return this;
     }
 
+    /**
+     * 全局设置读超时时间
+     */
     public RxHttp readTimeout(long readTimeout) {
         okHttpClientBuilder.readTimeout(readTimeout, TimeUnit.SECONDS);
         return this;
     }
 
+    /**
+     * 全局设置写超时时间
+     */
     public RxHttp writeTimeout(int writeTimeout) {
         okHttpClientBuilder.writeTimeout(writeTimeout, TimeUnit.SECONDS);
         return this;
     }
 
-
+    /**
+     * 全局设置连接超时时间
+     */
     public RxHttp connectTimeout(int connectTimeout) {
         okHttpClientBuilder.connectTimeout(connectTimeout, TimeUnit.SECONDS);
         return this;
@@ -301,6 +359,16 @@ public class RxHttp {
         //加入请求参数以及头信息
         if (headers.size() > 0) {
             addInterceptor(new HeaderInterceptor(headers));
+        }
+        if (interceptorList != null && interceptorList.size() > 0) {
+            for (Interceptor interceptor : interceptorList) {
+                okHttpClientBuilder.addInterceptor(interceptor);
+            }
+        }
+        if (networkInterceptorList != null && networkInterceptorList.size() > 0) {
+            for (Interceptor interceptor : networkInterceptorList) {
+                okHttpClientBuilder.addNetworkInterceptor(interceptor);
+            }
         }
         return okHttpClientBuilder;
     }
@@ -338,23 +406,35 @@ public class RxHttp {
         return this;
     }
 
+    /**
+     * 全局设置是否是异步请求
+     */
     public RxHttp isSyncRequest(boolean isSyncRequest) {
         this.isSyncRequest = isSyncRequest;
         return this;
     }
 
+    /**
+     * 超时重试次数
+     */
     public RxHttp retryCount(int retryCount) {
         if (retryCount < 0) throw new IllegalArgumentException("retryCount must > 0");
         this.mRetryCount = retryCount;
         return this;
     }
 
+    /**
+     * 超时重试延迟时间
+     */
     public RxHttp retryDelay(int retryDelay) {
         if (retryDelay < 0) throw new IllegalArgumentException("retryDelay must > 0");
         this.mRetryDelay = retryDelay;
         return this;
     }
 
+    /**
+     * 超时重试延迟叠加时间
+     */
     public RxHttp retryIncreaseDelay(int retryIncreaseDelay) {
         if (retryIncreaseDelay < 0)
             throw new IllegalArgumentException("retryIncreaseDelay must > 0");
@@ -367,7 +447,7 @@ public class RxHttp {
             throw new ExceptionInInitializerError("请先在全局Application中调用 RxHttp.getInstance().init() 初始化！");
     }
 
-    public PostRequest post(String url) {
+    public static PostRequest post(String url) {
         return new PostRequest(url);
     }
 }
