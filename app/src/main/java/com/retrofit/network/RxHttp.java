@@ -71,12 +71,10 @@ public class RxHttp {
     private List<Interceptor> networkInterceptorList = new ArrayList<>();
     private Context context;
     private String baseUrl;
-    private boolean isLog = true;
-    private boolean isCookie = false;
-    private boolean isCache = true;
     private boolean isSign = false;
     private boolean accessToken = false;
     private boolean isSyncRequest = false;
+    private HeaderInterceptor mHeaderInterceptor;
 
     public RxHttp init(Context context) {
         this.context = context;
@@ -131,7 +129,7 @@ public class RxHttp {
     public RxHttp isLog(boolean log) {
         LogUtil.setDebug(log);
         if (log) {
-            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
+            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS);
             addInterceptor(httpLoggingInterceptor);
         }
         return this;
@@ -141,7 +139,9 @@ public class RxHttp {
      * 全局网络拦截器
      */
     public RxHttp addNetworkInterceptor(Interceptor interceptor) {
-        networkInterceptorList.add(Util.checkNotNull(interceptor, "interceptor is null"));
+        if (!networkInterceptorList.contains(Util.checkNotNull(interceptor, "interceptor is null"))) {
+            networkInterceptorList.add(interceptor);
+        }
         return this;
     }
 
@@ -149,7 +149,9 @@ public class RxHttp {
      * 全局拦截器
      */
     public RxHttp addInterceptor(Interceptor interceptor) {
-        interceptorList.add(Util.checkNotNull(interceptor, "interceptor is null"));
+        if (!interceptorList.contains(Util.checkNotNull(interceptor, "interceptor is null"))) {
+            interceptorList.add(interceptor);
+        }
         return this;
     }
 
@@ -274,12 +276,34 @@ public class RxHttp {
         return this;
     }
 
+    public RxHttp remove(String key) {
+        if (headers.containsKey(key)) {
+            headers.remove(key);
+        }
+        if (this.mHeaderInterceptor != null) {
+            this.mHeaderInterceptor.remove(key);
+        }
+        return this;
+    }
+
+    public RxHttp clearAllHeaders() {
+        headers.clear();
+        if (this.mHeaderInterceptor != null) {
+            this.mHeaderInterceptor.clearAll();
+        }
+        return this;
+    }
+
     /**
      * 添加全局公共请求参数
      */
     public RxHttp addHeader(String key, String value) {
         this.headers.put(key, value);
         return this;
+    }
+
+    public HeaderInterceptor getBaseHeaderInterceptor() {
+        return this.mHeaderInterceptor;
     }
 
     public Map<String, String> getParameters() {
@@ -358,23 +382,32 @@ public class RxHttp {
     public OkHttpClient.Builder getOkHttpClientBuilder() {
         //加入请求参数以及头信息
         if (headers.size() > 0) {
-            addInterceptor(new HeaderInterceptor(headers));
+            if (mHeaderInterceptor != null) {
+                mHeaderInterceptor.addHeaderMap(headers);
+            } else {
+                mHeaderInterceptor = new HeaderInterceptor(headers);
+                //将添加统一头内容的拦截器放在第一位方便后面的拦截器使用
+                addInterceptor(mHeaderInterceptor);
+            }
         }
         if (interceptorList != null && interceptorList.size() > 0) {
             for (Interceptor interceptor : interceptorList) {
-                okHttpClientBuilder.addInterceptor(interceptor);
+                if (!okHttpClientBuilder.interceptors().contains(interceptor))
+                    okHttpClientBuilder.addInterceptor(interceptor);
             }
         }
         if (networkInterceptorList != null && networkInterceptorList.size() > 0) {
             for (Interceptor interceptor : networkInterceptorList) {
-                okHttpClientBuilder.addNetworkInterceptor(interceptor);
+                if (!okHttpClientBuilder.interceptors().contains(interceptor))
+                    okHttpClientBuilder.addNetworkInterceptor(interceptor);
             }
         }
         return okHttpClientBuilder;
     }
 
+
     public OkHttpClient getOkHttpClient() {
-        return okHttpClientBuilder.build();
+        return getOkHttpClientBuilder().build();
     }
 
     public Retrofit.Builder getRetrofitBuilder() {

@@ -31,6 +31,7 @@ public class RxCallbackSubscriber<T> extends BaseSubscriber<T> {
 
     @Override
     public void onNext(T result) {
+        super.onNext(result);
         if (mCallback != null) {
             mCallback.onSuccess(mTag, result);
         }

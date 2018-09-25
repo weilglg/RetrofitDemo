@@ -2,8 +2,6 @@ package com.retrofit.network.util;
 
 import android.support.annotation.NonNull;
 
-import com.retrofit.network.entity.HttpConfigEntity;
-
 import java.io.File;
 
 import okhttp3.MediaType;
@@ -24,38 +22,6 @@ public class Util {
 
     public static boolean isEmpty(String str) {
         return str == null || "".equals(str) || "null".equals(str);
-    }
-
-    public static HttpConfigEntity copyConfig(HttpConfigEntity configEntity) {
-        if (configEntity == null) {
-            return null;
-        }
-        HttpConfigEntity entity = new HttpConfigEntity();
-        entity.connectTimeOut = configEntity.connectTimeOut;
-        entity.readTimeOut = configEntity.readTimeOut;
-        entity.context = configEntity.context;
-        entity.baseUrl = configEntity.baseUrl;
-        entity.isLog = configEntity.isLog;
-        entity.isCookie = configEntity.isCookie;
-        entity.isCache = configEntity.isCache;
-        entity.isUseDefault = configEntity.isUseDefault;
-        entity.tag = configEntity.tag;
-        entity.cache = configEntity.cache;
-        entity.cacheFile = configEntity.cacheFile;
-        entity.proxy = configEntity.proxy;
-        entity.hostnameVerifier = configEntity.hostnameVerifier;
-        entity.converterFactory = configEntity.converterFactory;
-        entity.callAdapterFactory = configEntity.callAdapterFactory;
-        entity.sslSocketFactory = configEntity.sslSocketFactory;
-        entity.trustManager = configEntity.trustManager;
-        entity.cookieJar = configEntity.cookieJar;
-        entity.connectionPool = configEntity.connectionPool;
-        entity.headers = configEntity.headers;
-        entity.parameters = configEntity.parameters;
-        entity.httpClient = configEntity.httpClient;
-        entity.interceptorList = configEntity.interceptorList;
-        entity.networkInterceptorList = configEntity.networkInterceptorList;
-        return entity;
     }
 
     public static <T> T checkNotNull(T object, String message) {

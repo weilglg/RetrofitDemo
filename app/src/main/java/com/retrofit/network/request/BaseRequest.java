@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -30,13 +31,14 @@ import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.CallAdapter;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 
 @SuppressWarnings(value = {"unchecked", "deprecation"})
 public abstract class BaseRequest<R extends BaseRequest> {
-    protected String mUrl;                                               //请求Url
+    String mUrl;                                               //请求Url
     private Cache mCache;                                              //OkHttp缓存对象
     private File mCacheFile;                                           //缓存目录
     private long mCacheMaxSize;                                       //最大缓存
@@ -55,19 +57,19 @@ public abstract class BaseRequest<R extends BaseRequest> {
     private int mReadTimeout;                                          //读超时
     private int mWriteTimeout;                                         //写超时
     private int mConnectTimeout;                                       //链接超时
-    protected int mRetryCount;                    //重试次数默认3次
-    protected int mRetryDelay;                    //延迟xxms重试
-    protected int mRetryIncreaseDelay;    //叠加延迟
+    int mRetryCount;                                         //重试次数默认3次
+    int mRetryDelay;                                         //延迟xxms重试
+    int mRetryIncreaseDelay;                                 //叠加延迟
     private List<Interceptor> mInterceptorList = new ArrayList<>();
     private List<Interceptor> mNetworkInterceptorList = new ArrayList<>();
-    protected Context mContext;
+    Context mContext;
     private String mBaseUrl;
-    private boolean isSign = false;
-    private boolean accessToken = false;
-    protected boolean isSyncRequest = false;
+    private boolean isSign = false;                                   //是否需要签名
+    private boolean accessToken = false;                              //是否需要添加token
+    boolean isSyncRequest = false;
     private Retrofit mRetrofit;
-    protected ApiManager mApiManager;
-    private boolean isOperationHeader = false;
+    ApiManager mApiManager;
+    private HeaderInterceptor mHeaderInterceptor;
 
 
     public BaseRequest(String url) {
@@ -148,19 +150,26 @@ public abstract class BaseRequest<R extends BaseRequest> {
     }
 
     public R headers(Map<String, String> headers) {
-        isOperationHeader = true;
         this.mHeaders.putAll(Util.checkNotNull(headers, "headers is null"));
         return (R) this;
     }
 
-    public R addHeader(String key, String value){
+    public R addHeader(String key, String value) {
         this.mHeaders.put(key, value);
-        isOperationHeader = true;
         return (R) this;
     }
 
-    public R removeHeader(String key){
-        isOperationHeader = true;
+    public R removeHeader(String key) {
+        if (mHeaderInterceptor != null) {
+            mHeaderInterceptor.remove(key);
+        }
+        return (R) this;
+    }
+
+    public R clearHeaders() {
+        if (mHeaderInterceptor != null) {
+            mHeaderInterceptor.clearAll();
+        }
         return (R) this;
     }
 
@@ -251,7 +260,7 @@ public abstract class BaseRequest<R extends BaseRequest> {
         return (R) this;
     }
 
-    public R cacheMaxSize(long cacheMaxSize){
+    public R cacheMaxSize(long cacheMaxSize) {
         this.mCacheMaxSize = cacheMaxSize;
         return (R) this;
     }
@@ -259,9 +268,9 @@ public abstract class BaseRequest<R extends BaseRequest> {
     private OkHttpClient.Builder generateOkHttpClientBuilder() {
         if (mReadTimeout <= 0 && mWriteTimeout <= 0 && mConnectTimeout <= 0 && mSslParams == null
                 && mCookieJar == null && mCache == null && mCacheFile == null && mCacheMaxSize <= 0
-                && mInterceptorList.size() > 0 && mNetworkInterceptorList.size() > 0 && mProxy == null
+                && mInterceptorList.size() == 0 && mNetworkInterceptorList.size() == 0 && mProxy == null
                 && mSslSocketFactory == null && mTrustManager == null && mHostnameVerifier == null
-                && mCallAdapterFactory == null && mConverterFactory == null) {
+                && mCallAdapterFactory == null && mConverterFactory == null && mHeaders.isEmpty()) {
             OkHttpClient.Builder builder = RxHttp.getInstance().getOkHttpClientBuilder();
             for (Interceptor interceptor : builder.interceptors()) {
                 if (interceptor instanceof BaseDynamicInterceptor) {
@@ -270,28 +279,28 @@ public abstract class BaseRequest<R extends BaseRequest> {
             }
             return builder;
         } else {
-            OkHttpClient.Builder builder = RxHttp.getInstance().getOkHttpClient().newBuilder();
+            OkHttpClient.Builder newBuilder = RxHttp.getInstance().getOkHttpClient().newBuilder();
             if (mReadTimeout > 0) {
-                builder.readTimeout(mReadTimeout, TimeUnit.SECONDS);
+                newBuilder.readTimeout(mReadTimeout, TimeUnit.SECONDS);
             }
             if (mWriteTimeout > 0) {
-                builder.writeTimeout(mWriteTimeout, TimeUnit.SECONDS);
+                newBuilder.writeTimeout(mWriteTimeout, TimeUnit.SECONDS);
             }
             if (mConnectTimeout > 0) {
-                builder.connectTimeout(mConnectTimeout, TimeUnit.SECONDS);
+                newBuilder.connectTimeout(mConnectTimeout, TimeUnit.SECONDS);
             }
 
             if (mSslSocketFactory != null) {
                 if (mTrustManager == null) {
-                    builder.sslSocketFactory(mSslSocketFactory);
+                    newBuilder.sslSocketFactory(mSslSocketFactory);
                 } else {
-                    builder.sslSocketFactory(mSslSocketFactory, mTrustManager);
+                    newBuilder.sslSocketFactory(mSslSocketFactory, mTrustManager);
                 }
             } else if (mSslParams != null) {
-                builder.sslSocketFactory(mSslParams.sSLSocketFactory, mSslParams.trustManager);
+                newBuilder.sslSocketFactory(mSslParams.sSLSocketFactory, mSslParams.trustManager);
             }
             if (mHostnameVerifier != null) {
-                builder.hostnameVerifier(mHostnameVerifier);
+                newBuilder.hostnameVerifier(mHostnameVerifier);
             }
             if (mCacheFile == null) {
                 mCacheFile = new File(mContext.getCacheDir(), "retrofit_http_cache");
@@ -300,35 +309,40 @@ public abstract class BaseRequest<R extends BaseRequest> {
                 mCache = new Cache(mCacheFile, Math.max(5 * 1024 * 1024, mCacheMaxSize));
             }
             if (mCache != null) {
-                builder.cache(mCache);
+                newBuilder.cache(mCache);
             }
             if (mConnectionPool != null) {
-                builder.connectionPool(mConnectionPool);
+                newBuilder.connectionPool(mConnectionPool);
             }
             if (mProxy != null) {
-                builder.proxy(mProxy);
+                newBuilder.proxy(mProxy);
             }
             if (mCookieJar != null) {
-                builder.cookieJar(mCookieJar);
+                newBuilder.cookieJar(mCookieJar);
+            }
+            mHeaderInterceptor = RxHttp.getInstance().getBaseHeaderInterceptor();
+            if (mHeaderInterceptor != null) {
+                mHeaderInterceptor.addHeaderMap(mHeaders);
+            } else if (mHeaders != null && mHeaders.size() > 0) {
+                mHeaderInterceptor = new HeaderInterceptor(mHeaders);
+                newBuilder.interceptors().add(0, mHeaderInterceptor); //将添加统一头内容的拦截器放在第一位方便后面的拦截器使用
             }
             if (mInterceptorList.size() > 0) {
                 for (Interceptor interceptor : mInterceptorList) {
-                    builder.addInterceptor(interceptor);
+                    newBuilder.addInterceptor(interceptor);
                 }
             }
-            for (Interceptor interceptor : builder.interceptors()) {
+            for (Interceptor interceptor : newBuilder.interceptors()) {
                 if (interceptor instanceof BaseDynamicInterceptor) {
                     ((BaseDynamicInterceptor) interceptor).sign(isSign).accessToken(accessToken);
-                } else if (interceptor instanceof HeaderInterceptor && mHeaders.size() > 0) {
-                    ((HeaderInterceptor) interceptor).setMap(mHeaders);
                 }
             }
             if (mNetworkInterceptorList.size() > 0) {
                 for (Interceptor interceptor : mNetworkInterceptorList) {
-                    builder.addNetworkInterceptor(interceptor);
+                    newBuilder.addNetworkInterceptor(interceptor);
                 }
             }
-            return builder;
+            return newBuilder;
         }
 
     }

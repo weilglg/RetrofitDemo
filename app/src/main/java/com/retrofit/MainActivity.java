@@ -1,5 +1,6 @@
 package com.retrofit;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -30,6 +31,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.demo);
         ResultConfigLoader.init(getBaseContext());
+        RxHttp.getInstance().init(getBaseContext())
+                .baseUrl("https://ygzk.ygego.cn/api/")
+                .isLog(true)
+                .callAdapterFactory(RxJava2CallAdapterFactory.create())
+                .converterFactory(new Retrofit2ConverterFactory());
         findViewById(R.id.tv).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -37,17 +43,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         findViewById(R.id.tv2).setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("CheckResult")
             @Override
             public void onClick(View view) {
                 JSONObject param = new JSONObject();
                 param.put("pageSize", 1);
                 param.put("pageNum", 10);
-                RxHttp.getInstance().init(getBaseContext())
-                        .baseUrl("https://ygzk.ygego.cn/api/")
-                        .isLog(true)
-                        .callAdapterFactory(RxJava2CallAdapterFactory.create())
-                        .converterFactory(new Retrofit2ConverterFactory())
-                        .post("home/hotnews")
+                RxHttp.post("home/hotnews")
                         .jsonObj(param)
                         .execute(String.class).subscribeWith(new DisposableObserver<String>() {
                     @Override
@@ -73,18 +75,21 @@ public class MainActivity extends AppCompatActivity {
         JSONObject param = new JSONObject();
         param.put("pageSize", 1);
         param.put("pageNum", 10);
-        RxHttp.getInstance().init(getBaseContext())
-                .baseUrl("https://ygzk.ygego.cn/api/")
-                .isLog(true)
-                .callAdapterFactory(RxJava2CallAdapterFactory.create())
-                .converterFactory(new Retrofit2ConverterFactory())
-                .post("home/hotnews")
+
+        RxHttp.post("home/hotnews")
+                .addHeader("11", "2222")
+                .addHeader("22", "2222")
+                .addHeader("33", "2222")
+                .addHeader("44", "2222")
+                .addHeader("55", "2222")
+                .addHeader("66", "2222")
+                .addHeader("77", "2222")
                 .jsonObj(param)
                 .execute("CCCC", new ResponseTemplateCallback<String>() {
 
                     @Override
                     public boolean checkSuccessCode(int code, String msg) {
-                        return false;
+                        return code == 0;
                     }
 
                     @Override

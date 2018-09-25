@@ -2,6 +2,8 @@ package com.retrofit.network.interceptor;
 
 import android.support.annotation.NonNull;
 
+import com.retrofit.network.util.LogUtil;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,11 +21,15 @@ public class HeaderInterceptor implements Interceptor {
         this.map = map;
     }
 
-    public void setMap(Map<String, String> map) {
+    public void addHeaderMap(Map<String, String> map) {
         if (this.map == null) {
             this.map = new HashMap<>();
         }
         this.map.putAll(map);
+    }
+
+    private void addHeader(String key, String value) {
+        this.map.put(key, value);
     }
 
     public void clearAll() {
@@ -44,9 +50,10 @@ public class HeaderInterceptor implements Interceptor {
         if (map != null && map.size() > 0) {
             Set<String> keys = map.keySet();
             for (String headerKey : keys) {
-                builder.addHeader(headerKey, map.get(headerKey) == null ? "" : (String) map.get(headerKey)).build();
+                builder.addHeader(headerKey, map.get(headerKey) == null ? "" : map.get(headerKey)).build();
             }
         }
+        LogUtil.i("RxHttp", "-->>headers：" + builder.build().headers().toString());
         return chain.proceed(builder.build());
     }
 }
