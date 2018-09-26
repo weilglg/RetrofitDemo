@@ -22,5 +22,13 @@
         android:layout_marginRight="8dp"
         android:padding="10dp"
         android:text="默认配置" />
+    <Button
+        android:onClick="post_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:padding="10dp"
+        android:text="默认配置" />
 
 </LinearLayout>

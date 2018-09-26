@@ -1,5 +1,8 @@
 package com.retrofit.network.util;
 
+import com.retrofit.network.entity.ApiResultEntity;
+import com.retrofit.network.func.HandleResultFunc;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
@@ -60,6 +63,31 @@ public class RxUtil {
         };
     }
 
+    public static <T> ObservableTransformer<ApiResultEntity<T>, T> _io_main_result() {
+        return new ObservableTransformer<ApiResultEntity<T>, T>() {
+            @Override
+            public ObservableSource<T> apply(@NonNull Observable<ApiResultEntity<T>> upstream) {
+                return upstream
+                        .subscribeOn(Schedulers.io())
+                        .unsubscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .map(new HandleResultFunc<T>())
+                        .doOnSubscribe(new Consumer<Disposable>() {
+                            @Override
+                            public void accept(@NonNull Disposable disposable) throws Exception {
+                                LogUtil.i("+++doOnSubscribe+++" + disposable.isDisposed());
+                            }
+                        })
+                        .doFinally(new Action() {
+                            @Override
+                            public void run() throws Exception {
+                                LogUtil.i("+++doFinally+++");
+                            }
+                        });
+            }
+        };
+    }
+
 
     public static <T> ObservableTransformer<T, T> _main() {
         return new ObservableTransformer<T, T>() {
@@ -81,5 +109,6 @@ public class RxUtil {
             }
         };
     }
+
 
 }

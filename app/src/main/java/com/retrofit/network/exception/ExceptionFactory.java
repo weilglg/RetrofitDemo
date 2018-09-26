@@ -73,7 +73,6 @@ public class ExceptionFactory {
                 case HANDEL_ERRROR:
                     ex.setMessage("接口处理失败");
                     break;
-
                 default:
                     if (TextUtils.isEmpty(ex.getMessage())) {
                         ex.setMessage(e.getMessage());

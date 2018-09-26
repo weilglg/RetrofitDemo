@@ -8,13 +8,20 @@ import android.view.View;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.support.retrofit.Retrofit2ConverterFactory;
+import com.retrofit.network.Demo;
 import com.retrofit.network.RxHttp;
 import com.retrofit.network.callback.ResponseGenericsCallback;
 import com.retrofit.network.callback.ResponseStringCallback;
 import com.retrofit.network.callback.ResponseTemplateCallback;
+import com.retrofit.network.callback.ResultCallback;
+import com.retrofit.network.callback.ResultCallbackProxy;
 import com.retrofit.network.config.ResultConfigLoader;
+import com.retrofit.network.entity.ApiResultEntity;
 import com.retrofit.network.exception.ApiThrowable;
 import com.retrofit.network.util.LogUtil;
+import com.retrofit.network.util.TestApi;
+
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -85,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
                 .addHeader("66", "2222")
                 .addHeader("77", "2222")
                 .jsonObj(param)
-                .execute("CCCC", new ResponseTemplateCallback<String>() {
+                .execute("CCCC", new ResponseTemplateCallback<Demo<List<String>>>() {
 
                     @Override
                     public boolean checkSuccessCode(int code, String msg) {
@@ -98,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onSuccess(Object tag, String result) {
+                    public void onSuccess(Object tag, Demo<List<String>> result) {
                         LogUtil.e("MainActivity", "result=" + result);
                     }
 
@@ -126,4 +133,59 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //                });
     }
+
+
+    public void post_2(View v) {
+        JSONObject param = new JSONObject();
+        param.put("pageSize", 1);
+        param.put("pageNum", 10);
+
+        RxHttp.post_2("home/hotnews")
+                .jsonObj(param)
+                .execute("post_2", new ResultCallbackProxy<TestApi<String>, String>(new ResultCallback<String>() {
+                    @Override
+                    public void onStart(Object tag) {
+                        Log.e("tag", "onStart");
+                    }
+
+                    @Override
+                    public void onCompleted(Object tag) {
+                        Log.e("tag", "onCompleted");
+                    }
+
+                    @Override
+                    public void onError(Object tag, ApiThrowable throwable) {
+                        Log.e("tag", "onError=" + throwable.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Object tag, String s) {
+                        Log.e("tag", "onSuccess=" + s);
+                    }
+                }) {
+                });
+//                .execute("post_2", new ResultCallback<String>() {
+//                    @Override
+//                    public void onStart(Object tag) {
+//                        Log.e("tag", "onCompleted");
+//                    }
+//
+//                    @Override
+//                    public void onCompleted(Object tag) {
+//                        Log.e("tag", "onCompleted");
+//                    }
+//
+//                    @Override
+//                    public void onError(Object tag, ApiThrowable throwable) {
+//                        Log.e("tag", "onError=" + throwable.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onSuccess(Object tag, String s) {
+//                        Log.e("tag", "onSuccess=" + s);
+//                    }
+//                });
+    }
+
+
 }

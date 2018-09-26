@@ -5,6 +5,7 @@ import android.content.Context;
 
 import com.retrofit.network.interceptor.HeaderInterceptor;
 import com.retrofit.network.request.PostRequest;
+import com.retrofit.network.request.PostRequest_2;
 import com.retrofit.network.util.LogUtil;
 import com.retrofit.network.util.SSLUtil;
 import com.retrofit.network.util.Util;
@@ -33,7 +34,7 @@ import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
-public class RxHttp {
+public final class RxHttp {
 
     private static final String TAG = RxHttp.class.getSimpleName();
     public static final int DEFAULT_MILLISECONDS = 30;             //默认的超时时间
@@ -73,7 +74,7 @@ public class RxHttp {
     private String baseUrl;
     private boolean isSign = false;
     private boolean accessToken = false;
-    private boolean isSyncRequest = false;
+    private boolean isSyncRequest = true;
     private HeaderInterceptor mHeaderInterceptor;
 
     public RxHttp init(Context context) {
@@ -129,7 +130,7 @@ public class RxHttp {
     public RxHttp isLog(boolean log) {
         LogUtil.setDebug(log);
         if (log) {
-            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS);
+            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
             addInterceptor(httpLoggingInterceptor);
         }
         return this;
@@ -379,6 +380,80 @@ public class RxHttp {
         return context;
     }
 
+    public int getRetryCount() {
+        return mRetryCount;
+    }
+
+    public int getRetryDelay() {
+        return mRetryDelay;
+    }
+
+    public int getRetryIncreaseDelay() {
+        return mRetryIncreaseDelay;
+    }
+
+    public boolean isSign() {
+        return isSign;
+    }
+
+    public RxHttp isSign(boolean isSign) {
+        this.isSign = isSign;
+        return this;
+    }
+
+    public boolean isSyncRequest() {
+        return isSyncRequest;
+    }
+
+    /**
+     * 全局设置是否是异步请求
+     */
+    public RxHttp isSyncRequest(boolean isSyncRequest) {
+        this.isSyncRequest = isSyncRequest;
+        return this;
+    }
+
+    public boolean isAccessToken() {
+        return accessToken;
+    }
+
+    public void accessToken(boolean accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    /**
+     * 超时重试次数
+     */
+    public RxHttp retryCount(int retryCount) {
+        if (retryCount < 0) throw new IllegalArgumentException("retryCount must > 0");
+        this.mRetryCount = retryCount;
+        return this;
+    }
+
+    /**
+     * 超时重试延迟时间
+     */
+    public RxHttp retryDelay(int retryDelay) {
+        if (retryDelay < 0) throw new IllegalArgumentException("retryDelay must > 0");
+        this.mRetryDelay = retryDelay;
+        return this;
+    }
+
+    /**
+     * 超时重试延迟叠加时间
+     */
+    public RxHttp retryIncreaseDelay(int retryIncreaseDelay) {
+        if (retryIncreaseDelay < 0)
+            throw new IllegalArgumentException("retryIncreaseDelay must > 0");
+        this.mRetryIncreaseDelay = retryIncreaseDelay;
+        return this;
+    }
+
+    private void testInitialize() {
+        if (this.context == null)
+            throw new ExceptionInInitializerError("请先在全局Application中调用 RxHttp.getInstance().init() 初始化！");
+    }
+
     public OkHttpClient.Builder getOkHttpClientBuilder() {
         //加入请求参数以及头信息
         if (headers.size() > 0) {
@@ -418,69 +493,11 @@ public class RxHttp {
         return retrofitBuilder.build();
     }
 
-    public int getRetryCount() {
-        return mRetryCount;
-    }
-
-    public int getRetryDelay() {
-        return mRetryDelay;
-    }
-
-    public int getRetryIncreaseDelay() {
-        return mRetryIncreaseDelay;
-    }
-
-    public boolean isSign() {
-        return isSign;
-    }
-
-    public RxHttp isSign(boolean isSign) {
-        this.isSign = isSign;
-        return this;
-    }
-
-    /**
-     * 全局设置是否是异步请求
-     */
-    public RxHttp isSyncRequest(boolean isSyncRequest) {
-        this.isSyncRequest = isSyncRequest;
-        return this;
-    }
-
-    /**
-     * 超时重试次数
-     */
-    public RxHttp retryCount(int retryCount) {
-        if (retryCount < 0) throw new IllegalArgumentException("retryCount must > 0");
-        this.mRetryCount = retryCount;
-        return this;
-    }
-
-    /**
-     * 超时重试延迟时间
-     */
-    public RxHttp retryDelay(int retryDelay) {
-        if (retryDelay < 0) throw new IllegalArgumentException("retryDelay must > 0");
-        this.mRetryDelay = retryDelay;
-        return this;
-    }
-
-    /**
-     * 超时重试延迟叠加时间
-     */
-    public RxHttp retryIncreaseDelay(int retryIncreaseDelay) {
-        if (retryIncreaseDelay < 0)
-            throw new IllegalArgumentException("retryIncreaseDelay must > 0");
-        this.mRetryIncreaseDelay = retryIncreaseDelay;
-        return this;
-    }
-
-    private void testInitialize() {
-        if (this.context == null)
-            throw new ExceptionInInitializerError("请先在全局Application中调用 RxHttp.getInstance().init() 初始化！");
-    }
-
     public static PostRequest post(String url) {
         return new PostRequest(url);
+    }
+
+    public static PostRequest_2 post_2(String url) {
+        return new PostRequest_2(url);
     }
 }

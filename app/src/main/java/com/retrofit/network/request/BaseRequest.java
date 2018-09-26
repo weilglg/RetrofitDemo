@@ -66,20 +66,28 @@ public abstract class BaseRequest<R extends BaseRequest> {
     private String mBaseUrl;
     private boolean isSign = false;                                   //是否需要签名
     private boolean accessToken = false;                              //是否需要添加token
-    boolean isSyncRequest = false;
+    boolean isSyncRequest = true;
     private Retrofit mRetrofit;
     ApiManager mApiManager;
     private HeaderInterceptor mHeaderInterceptor;
 
 
     public BaseRequest(String url) {
+        RxHttp rxHttp = RxHttp.getInstance();
         this.mUrl = url;
-        this.mContext = RxHttp.getInstance().getContext();
+        this.mContext = rxHttp.getContext();
+        this.isSign = rxHttp.isSign();
+        this.accessToken = rxHttp.isAccessToken();
+        this.isSyncRequest = rxHttp.isSyncRequest();
+        this.mRetryCount = rxHttp.getRetryCount();
+        this.mRetryDelay = rxHttp.getRetryDelay();
+        this.mRetryIncreaseDelay = rxHttp.getRetryIncreaseDelay();
         if (mBaseUrl == null && url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
             HttpUrl httpUrl = HttpUrl.parse(url);
             if (httpUrl != null)
                 mBaseUrl = httpUrl.url().getProtocol() + "://" + httpUrl.url().getHost() + "/";
         }
+
     }
 
     public R baseUrl(String baseUrl) {
@@ -320,13 +328,7 @@ public abstract class BaseRequest<R extends BaseRequest> {
             if (mCookieJar != null) {
                 newBuilder.cookieJar(mCookieJar);
             }
-            mHeaderInterceptor = RxHttp.getInstance().getBaseHeaderInterceptor();
-            if (mHeaderInterceptor != null) {
-                mHeaderInterceptor.addHeaderMap(mHeaders);
-            } else if (mHeaders != null && mHeaders.size() > 0) {
-                mHeaderInterceptor = new HeaderInterceptor(mHeaders);
-                newBuilder.interceptors().add(0, mHeaderInterceptor); //将添加统一头内容的拦截器放在第一位方便后面的拦截器使用
-            }
+            addHeaderInterceptor(newBuilder);
             if (mInterceptorList.size() > 0) {
                 for (Interceptor interceptor : mInterceptorList) {
                     newBuilder.addInterceptor(interceptor);
@@ -345,6 +347,24 @@ public abstract class BaseRequest<R extends BaseRequest> {
             return newBuilder;
         }
 
+    }
+
+    /**
+     * 添加请求头，并保证在拦截器的第一位，以方便后面的拦截器使用到头信息
+     */
+    private void addHeaderInterceptor(OkHttpClient.Builder newBuilder) {
+        mHeaderInterceptor = RxHttp.getInstance().getBaseHeaderInterceptor();
+        if (mHeaderInterceptor != null) {
+            mHeaderInterceptor.addHeaderMap(mHeaders);
+        } else if (mHeaders != null && mHeaders.size() > 0) {
+            mHeaderInterceptor = new HeaderInterceptor(mHeaders);
+            //将添加统一头内容的拦截器放在第一位方便后面的拦截器使用
+            if (newBuilder.interceptors().size() > 0) {
+                newBuilder.interceptors().add(0, mHeaderInterceptor);
+            } else {
+                newBuilder.interceptors().add(mHeaderInterceptor);
+            }
+        }
     }
 
     private Retrofit.Builder generateRetrofitBuilder() {

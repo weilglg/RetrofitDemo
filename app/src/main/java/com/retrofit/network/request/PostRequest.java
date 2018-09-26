@@ -25,7 +25,7 @@ public class PostRequest extends HttpBodyRequest<PostRequest> {
 
     public <T> Observable<T> execute(final Class<T> clazz) {
         return build().generateRequest()
-                .compose(isSyncRequest ? RxUtil._main() : RxUtil._io_main())
+                .compose(isSyncRequest ? RxUtil._io_main() : RxUtil._main())
                 .compose(new HandleErrorTransformer())
                 .retryWhen(new RetryExceptionFunc(mRetryCount, mRetryDelay, mRetryIncreaseDelay))
                 .map(new Function<ResponseBody, T>() {
@@ -45,7 +45,7 @@ public class PostRequest extends HttpBodyRequest<PostRequest> {
     }
 
     private Observable<ResponseBody> generateObservable(Observable observable) {
-        return observable.compose(isSyncRequest ? RxUtil._main() : RxUtil._io_main())
+        return observable.compose(isSyncRequest ? RxUtil._io_main() : RxUtil._main())
                 .retryWhen(new RetryExceptionFunc(mRetryCount, mRetryDelay, mRetryIncreaseDelay));
     }
 }
