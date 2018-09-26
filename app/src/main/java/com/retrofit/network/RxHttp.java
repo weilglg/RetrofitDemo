@@ -3,9 +3,10 @@ package com.retrofit.network;
 
 import android.content.Context;
 
+import com.retrofit.BuildConfig;
 import com.retrofit.network.interceptor.HeaderInterceptor;
-import com.retrofit.network.request.PostRequest;
-import com.retrofit.network.request.PostRequest_2;
+import com.retrofit.network.request.TemplatePostRequest;
+import com.retrofit.network.request.ApiResultPostRequest;
 import com.retrofit.network.util.LogUtil;
 import com.retrofit.network.util.SSLUtil;
 import com.retrofit.network.util.Util;
@@ -46,7 +47,7 @@ public final class RxHttp {
 
     private static RxHttp mInstance;
     private OkHttpClient.Builder okHttpClientBuilder;                       //okhttp请求的客户端
-    private Retrofit.Builder retrofitBuilder;                         //Retrofit请求Builder
+    private Retrofit.Builder retrofitBuilder;                         //Retrlofit请求Builder
     private Cache cache;                                              //OkHttp缓存对象
     private File cacheFile;                                           //缓存目录
     private long mCacheMaxSize;                                       //最大缓存
@@ -129,9 +130,12 @@ public final class RxHttp {
      */
     public RxHttp isLog(boolean log) {
         LogUtil.setDebug(log);
-        if (log) {
-            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
-            addInterceptor(httpLoggingInterceptor);
+        if (log && BuildConfig.DEBUG) {
+            // Log信息拦截器
+            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            //设置 Debug Log 模式
+            this.okHttpClientBuilder.addInterceptor(loggingInterceptor);
         }
         return this;
     }
@@ -493,11 +497,11 @@ public final class RxHttp {
         return retrofitBuilder.build();
     }
 
-    public static PostRequest post(String url) {
-        return new PostRequest(url);
+    public static TemplatePostRequest post(String url) {
+        return new TemplatePostRequest(url);
     }
 
-    public static PostRequest_2 post_2(String url) {
-        return new PostRequest_2(url);
+    public static ApiResultPostRequest resultPost(String url) {
+        return new ApiResultPostRequest(url);
     }
 }

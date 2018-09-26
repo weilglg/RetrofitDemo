@@ -10,22 +10,16 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.support.retrofit.Retrofit2ConverterFactory;
 import com.retrofit.network.Demo;
 import com.retrofit.network.RxHttp;
-import com.retrofit.network.callback.ResponseGenericsCallback;
-import com.retrofit.network.callback.ResponseStringCallback;
 import com.retrofit.network.callback.ResponseTemplateCallback;
 import com.retrofit.network.callback.ResultCallback;
 import com.retrofit.network.callback.ResultCallbackProxy;
 import com.retrofit.network.config.ResultConfigLoader;
-import com.retrofit.network.entity.ApiResultEntity;
 import com.retrofit.network.exception.ApiThrowable;
 import com.retrofit.network.util.LogUtil;
 import com.retrofit.network.util.TestApi;
 
 import java.util.List;
 
-import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.functions.Function;
 import io.reactivex.observers.DisposableObserver;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
@@ -140,9 +134,9 @@ public class MainActivity extends AppCompatActivity {
         param.put("pageSize", 1);
         param.put("pageNum", 10);
 
-        RxHttp.post_2("home/hotnews")
+        RxHttp.resultPost("home/hotnews")
                 .jsonObj(param)
-                .execute("post_2", new ResultCallbackProxy<TestApi<String>, String>(new ResultCallback<String>() {
+                .execute("resultPost", new ResultCallbackProxy<TestApi<String>, String>(new ResultCallback<String>() {
                     @Override
                     public void onStart(Object tag) {
                         Log.e("tag", "onStart");
@@ -162,9 +156,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(Object tag, String s) {
                         Log.e("tag", "onSuccess=" + s);
                     }
-                }) {
-                });
-//                .execute("post_2", new ResultCallback<String>() {
+                }){});
+//                .execute("resultPost", new ResultCallback<String>() {
 //                    @Override
 //                    public void onStart(Object tag) {
 //                        Log.e("tag", "onCompleted");

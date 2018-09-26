@@ -110,5 +110,27 @@ public class RxUtil {
         };
     }
 
+    public static <T> ObservableTransformer<ApiResultEntity<T>, T> _main_result() {
+        return new ObservableTransformer<ApiResultEntity<T>, T>() {
+            @Override
+            public ObservableSource<T> apply(@NonNull Observable<ApiResultEntity<T>> upstream) {
+                return upstream
+                        .map(new HandleResultFunc<T>())
+                        .doOnSubscribe(new Consumer<Disposable>() {
+                            @Override
+                            public void accept(@NonNull Disposable disposable) throws Exception {
+                                LogUtil.i("+++doOnSubscribe+++" + disposable.isDisposed());
+                            }
+                        })
+                        .doFinally(new Action() {
+                            @Override
+                            public void run() throws Exception {
+                                LogUtil.i("+++doFinally+++");
+                            }
+                        });
+            }
+        };
+    }
+
 
 }

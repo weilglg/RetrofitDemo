@@ -10,16 +10,14 @@ import com.retrofit.network.transformer.HandleResponseBodyTransformer;
 import com.retrofit.network.util.RxUtil;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.ObservableTransformer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 import okhttp3.ResponseBody;
 
 @SuppressWarnings(value = {"unchecked", "deprecation"})
-public class PostRequest extends HttpBodyRequest<PostRequest> {
+public class TemplatePostRequest extends HttpBodyRequest<TemplatePostRequest> {
 
-    public PostRequest(String url) {
+    public TemplatePostRequest(String url) {
         super(url);
     }
 

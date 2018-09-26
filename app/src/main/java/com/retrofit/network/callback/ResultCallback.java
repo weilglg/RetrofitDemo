@@ -5,6 +5,11 @@ import com.retrofit.network.util.Util;
 
 import java.lang.reflect.Type;
 
+/**
+ * 回调函数
+ *
+ * @param <T> 真是需要的返回结果类型
+ */
 public abstract class ResultCallback<T> implements IResultType<T> {
 
     public abstract void onStart(Object tag);

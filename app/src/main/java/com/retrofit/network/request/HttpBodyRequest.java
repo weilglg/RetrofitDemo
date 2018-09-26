@@ -7,8 +7,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.retrofit.network.UploadFileType;
 import com.retrofit.network.util.Util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.reactivex.Observable;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
@@ -65,10 +69,13 @@ public class HttpBodyRequest<R extends BaseRequest> extends BaseRequest<R> {
 
     public R txt(String txt) {
         this.mStr = txt;
+        this.mMediaType = okhttp3.MediaType.parse("text/plain");
         return (R) this;
     }
 
-    public R mediaType(MediaType mediaType) {
+    public R mediaType(String txt, MediaType mediaType) {
+        this.mStr = txt;
+        Util.checkNotNull(mediaType, "mediaType==null");
         this.mMediaType = mediaType;
         return (R) this;
     }
@@ -84,12 +91,7 @@ public class HttpBodyRequest<R extends BaseRequest> extends BaseRequest<R> {
         } else if (mJsonArr != null) {
             return mApiManager.postJson(mUrl, mJsonArr);
         } else if (!TextUtils.isEmpty(mStr)) {
-            RequestBody requestBody;
-            if (mMediaType == null) {
-                requestBody = Util.createText(mStr);
-            } else {
-                requestBody = RequestBody.create(mMediaType, mStr);
-            }
+            RequestBody requestBody = RequestBody.create(mMediaType, mStr);
             return mApiManager.postBody(mUrl, requestBody);
         } else if (mBytes != null) {
             return mApiManager.postBody(mUrl, Util.createBytes(mBytes));
@@ -109,6 +111,11 @@ public class HttpBodyRequest<R extends BaseRequest> extends BaseRequest<R> {
     }
 
     private Observable<ResponseBody> uploadFilesWithParts() {
+        List<MultipartBody.Part> partList = new ArrayList<>();
+        for (String key : mParameters.keySet()) {
+            partList.add(MultipartBody.Part.createFormData(key, mParameters.get(key)));
+        }
+
         return null;
     }
 

@@ -11,6 +11,12 @@ import java.util.Map;
 
 import okhttp3.ResponseBody;
 
+/**
+ * 回调代理类，实现泛型的解析以及组装（定义为抽象类是因为方便获取泛型）
+ *
+ * @param <T> {@link ApiResultEntity}的子类及返回结果的统一基类
+ * @param <R> 真正的返回结果类型
+ */
 public abstract class ResultCallbackProxy<T extends ApiResultEntity<R>, R> implements IResultType<T> {
 
     ResultCallback<R> mCallback;
@@ -44,6 +50,14 @@ public abstract class ResultCallbackProxy<T extends ApiResultEntity<R>, R> imple
         }
 
         return $Gson$Types.newParameterizedTypeWithOwner(null, rawType, typeArguments);
+    }
+
+    /**
+     * 返回结果为ApiResultEntity<T>格式的回调代理类
+     */
+    public static <T> ResultCallbackProxy<ApiResultEntity<T>, T> NEW_DEFAULT_INSTANCE(ResultCallback<T> callback) {
+        return new ResultCallbackProxy<ApiResultEntity<T>, T>(callback) {
+        };
     }
 
 }

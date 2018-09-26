@@ -32,15 +32,10 @@ public class ApiResultFunc<T> implements Function<ResponseBody, ApiResultEntity<
         if (TextUtils.isEmpty(jsonStr))
             throw new NullPointerException("json is null");
         try {
-            if (type instanceof ParameterizedType) {
-                final Class<T> cls = (Class) ((ParameterizedType) type).getRawType();
-                if (ApiResultEntity.class.isAssignableFrom(cls)) {
-                    apiResult = JSON.parseObject(jsonStr, type, Feature.UseBigDecimal);
-                } else {
-                    apiResult.setCode(-1);
-                    apiResult.setMsg("ApiResultEntity.class.isAssignableFrom(subClazz) err!!");
-                }
-            }else{
+            final Class<T> subClazz = (Class) ((ParameterizedType) type).getRawType();
+            if (ApiResultEntity.class.isAssignableFrom(subClazz)) {
+                apiResult = JSON.parseObject(jsonStr, type, Feature.UseBigDecimal);
+            } else {
                 apiResult.setCode(-1);
                 apiResult.setMsg("ApiResultEntity.class.isAssignableFrom(subClazz) err!!");
             }

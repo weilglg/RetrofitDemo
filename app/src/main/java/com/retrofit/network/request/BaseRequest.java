@@ -52,7 +52,7 @@ public abstract class BaseRequest<R extends BaseRequest> {
     private CookieJar mCookieJar;                                      //Cookie管理
     private ConnectionPool mConnectionPool;                            //链接池管理
     private Map<String, String> mHeaders = new HashMap<>();            //公共请求头
-    private Map<String, String> mParameters = new HashMap<>();         //公共请求参数
+     Map<String, String> mParameters = new HashMap<>();         //公共请求参数
     private OkHttpClient mHttpClient;                                  //自定义OkHttpClient
     private int mReadTimeout;                                          //读超时
     private int mWriteTimeout;                                         //写超时
