@@ -11,7 +11,7 @@ import okhttp3.ResponseBody;
 public abstract class ResponseStringCallback extends ResponseCallback<String> {
 
     @Override
-    public String onTransformationResponse(Object tag, ResponseBody body) throws Exception {
+    public String onTransformationResponse(ResponseBody body) throws Exception {
         String jsonStr = "";
         try {
             body.string();

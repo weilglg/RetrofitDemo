@@ -19,7 +19,7 @@ public abstract class ResponseGenericsCallback<T> extends ResponseCallback<T> {
 
 
     @Override
-    public T onTransformationResponse(Object tag, ResponseBody body) throws Exception {
+    public T onTransformationResponse(ResponseBody body) throws Exception {
         try {
             String jsonStr = body.string();
             if (TextUtils.isEmpty(jsonStr)) throw new NullPointerException("body is null");
