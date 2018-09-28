@@ -40,11 +40,7 @@ public class HttpBodyRequest<R extends BaseRequest> extends BaseRequest<R> {
     public HttpBodyRequest(String url) {
         super(url);
     }
-
-    public R uploadFileType(UploadFileType type) {
-        this.mUploadType = type;
-        return (R) this;
-    }
+    
 
     public R requestBody(RequestBody requestBody) {
         this.mRequestBody = requestBody;
@@ -165,23 +161,76 @@ public class HttpBodyRequest<R extends BaseRequest> extends BaseRequest<R> {
         } else if (!mHttpParams.isFilesEmpty()) {
             if (mUploadType == UploadFileType.BODY_MAP) {
                 return uploadFilesWithBodyMap();
+            } else if (mUploadType == UploadFileType.FROM) {
+                return uploadFilesWithFromParts();
+            } else if (mUploadType == UploadFileType.PART_LIST) {
+                return uploadFilesWithPartList();
+            } else if (mUploadType == UploadFileType.PART_MAP) {
+                return uploadFilesWithPartMap();
             } else if (mUploadType == UploadFileType.BODY) {
-                return uploadFilesWithBody();
-
+                return uploadFileWithBody();
             } else {
-                return uploadFilesWithParts();
+                return uploadFileWithPart();
             }
         } else {
             return mApiManager.post(mUrl);
         }
     }
 
-    private Observable<ResponseBody> uploadFilesWithBody() {
-
+    /**
+     * 单个RequestBody提交
+     *
+     * @return
+     */
+    private Observable<ResponseBody> uploadFileWithBody() {
         RequestBody requestBody = null;
-        return mApiManager.uploadFile(mUrl, requestBody);
+        HashMap<String, List<FileEntity>> fileMap = mHttpParams.getFileMap();
+        for (Map.Entry<String, List<FileEntity>> entry : fileMap.entrySet()) {
+            requestBody = getRequestBody(entry.getValue().get(0));
+            break;
+        }
+        return mApiManager.uploadFileWithBody(mUrl, requestBody);
     }
 
+    private Observable<ResponseBody> uploadFileWithPart() {
+        MultipartBody.Part part = null;
+        HashMap<String, List<FileEntity>> fileMap = mHttpParams.getFileMap();
+        for (Map.Entry<String, List<FileEntity>> entry : fileMap.entrySet()) {
+            part = createPartBody(entry.getKey(), entry.getValue().get(0));
+            break;
+        }
+        return mApiManager.uploadFileWithPart(mUrl, part);
+    }
+
+    /**
+     * From表单形式提交
+     *
+     * @return
+     */
+    private Observable<ResponseBody> uploadFilesWithFromParts() {
+        MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+
+        //拼接参数键值对
+        for (Map.Entry<String, String> mapEntry : mHttpParams.getParamMap().entrySet()) {
+            builder.addFormDataPart(mapEntry.getKey(), mapEntry.getValue());
+        }
+        //拼接文件
+        for (Map.Entry<String, List<FileEntity>> entry : mHttpParams.getFileMap().entrySet()) {
+            List<FileEntity> fileValues = entry.getValue();
+            for (FileEntity fileWrapper : fileValues) {
+                RequestBody requestBody = getRequestBody(fileWrapper);
+                builder.addFormDataPart(entry.getKey(), fileWrapper.getFileName(), requestBody);
+            }
+        }
+        return mApiManager.uploadFileWithBody(mUrl, builder.build());
+    }
+
+
+    /**
+     * 以RequestBody的Map形式提交
+     *
+     * @return
+     */
     private Observable<ResponseBody> uploadFilesWithBodyMap() {
         Map<String, RequestBody> mBodyMap = new HashMap<>();
         //拼接参数键值对
@@ -197,10 +246,15 @@ public class HttpBodyRequest<R extends BaseRequest> extends BaseRequest<R> {
                 mBodyMap.put(entry.getKey(), requestBody);
             }
         }
-        return mApiManager.uploadFile(mUrl, mBodyMap);
+        return mApiManager.uploadFileWithBodyMap(mUrl, mBodyMap);
     }
 
-    private Observable<ResponseBody> uploadFilesWithParts() {
+    /**
+     * 以MultipartBody.Part的List形式提交
+     *
+     * @return
+     */
+    private Observable<ResponseBody> uploadFilesWithPartList() {
         List<MultipartBody.Part> partList = new ArrayList<>();
         HashMap<String, String> paramMap = mHttpParams.getParamMap();
         for (String key : paramMap.keySet()) {
@@ -212,7 +266,31 @@ public class HttpBodyRequest<R extends BaseRequest> extends BaseRequest<R> {
                 partList.add(part);
             }
         }
-        return mApiManager.uploadFile(mUrl, partList);
+        return mApiManager.uploadFileWithPartList(mUrl, partList);
+    }
+
+    /**
+     * 以MultipartBody.Part的List形式提交
+     *
+     * @return
+     */
+    private Observable<ResponseBody> uploadFilesWithPartMap() {
+        Map<String, MultipartBody.Part> partMap = new HashMap<>();
+        //拼接普通参数
+        HashMap<String, String> paramMap = mHttpParams.getParamMap();
+        for (String key : paramMap.keySet()) {
+            partMap.put(key, MultipartBody.Part.createFormData(key, paramMap.get(key)));
+        }
+        //拼接文件参数
+        HashMap<String, List<FileEntity>> fileMap = mHttpParams.getFileMap();
+        for (Map.Entry<String, List<FileEntity>> entitySet : fileMap.entrySet()) {
+            String key = entitySet.getKey();
+            for (FileEntity entity : entitySet.getValue()) {
+                MultipartBody.Part part = createPartBody(entitySet.getKey(), entity);
+                partMap.put(key, part);
+            }
+        }
+        return mApiManager.uploadFileWithPartMap(mUrl, partMap);
     }
 
     private MultipartBody.Part createPartBody(String key, FileEntity value) {

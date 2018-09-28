@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.support.retrofit.Retrofit2ConverterFactory;
 import com.retrofit.network.Demo;
 import com.retrofit.network.RxHttp;
+import com.retrofit.network.UploadFileType;
 import com.retrofit.network.callback.ResponseTemplateCallback;
 import com.retrofit.network.callback.ResultCallback;
 import com.retrofit.network.callback.ResultCallbackProxy;
@@ -193,9 +194,10 @@ public class MainActivity extends AppCompatActivity {
     public void uploadFile(View v) {
         File file = new File(Environment.getExternalStorageDirectory() +
                 File.separator + "1.jpg");
-        RxHttp.resultPost("upload5273")
-                .baseUrl("http://business-workbench.qingtian.ygego.alpha4/rest/")
+        RxHttp.resultPost("common/uploadImg")
+                .baseUrl("https://ygzk.ygego.cn/api/")
                 .params("appId", "27")
+                .uploadType(UploadFileType.FROM)
                 .params("image", file)
                 .execute("upload", new ResultProgressCallback<String>() {
                     @Override

@@ -39,20 +39,29 @@ public interface ApiManager {
     @POST()
     Observable<ResponseBody> post(@Url String url);
 
-    @POST()
     @FormUrlEncoded
+    @POST()
     Observable<ResponseBody> postMap(@Url String mUrl, @FieldMap Map<String, String> maps);
 
     @Multipart
     @POST()
-    Observable<ResponseBody> uploadFile(@Url String mUrl, @Part() List<MultipartBody.Part> partList);
+    Observable<ResponseBody> uploadFileWithPartList(@Url String mUrl, @Part() List<MultipartBody.Part> partList);
 
     @Multipart
     @POST()
-    Observable<ResponseBody> uploadFile(@Url String mUrl, @PartMap() Map<String, RequestBody> maps);
+    Observable<ResponseBody> uploadFileWithPartMap(@Url String mUrl, @PartMap() Map<String, MultipartBody.Part> partMap);
 
     @POST()
-    Observable<ResponseBody> uploadFile(@Url() String url, @Body RequestBody Body);
+    Observable<ResponseBody> uploadFileWithBody(@Url() String url, @Body RequestBody Body);
+
+    @Multipart
+    @POST()
+    Observable<ResponseBody> uploadFileWithBodyMap(@Url String mUrl, @PartMap() Map<String, RequestBody> maps);
+
+    @Multipart
+    @POST()
+    Observable<ResponseBody> uploadFileWithPart(@Url String fileUrl, @Part()MultipartBody.Part file);
+
 
 //    @POST()
 //    @Headers({"Content-Type: application/json", "Accept: application/json"})
