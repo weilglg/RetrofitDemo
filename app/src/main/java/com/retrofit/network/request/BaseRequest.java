@@ -4,6 +4,11 @@ import android.content.Context;
 
 import com.retrofit.network.ApiManager;
 import com.retrofit.network.RxHttp;
+import com.retrofit.network.callback.ResultCallback;
+import com.retrofit.network.callback.ResultProgressCallback;
+import com.retrofit.network.entity.HttpParamEntity;
+import com.retrofit.network.interceptor.ProgressRequestInterceptor;
+import com.retrofit.network.interceptor.ProgressResponseInterceptor;
 import com.retrofit.network.util.Util;
 import com.retrofit.network.interceptor.BaseDynamicInterceptor;
 import com.retrofit.network.interceptor.HeaderInterceptor;
@@ -38,28 +43,30 @@ import retrofit2.Retrofit;
 
 @SuppressWarnings(value = {"unchecked", "deprecation"})
 public abstract class BaseRequest<R extends BaseRequest> {
-    String mUrl;                                               //请求Url
-    private Cache mCache;                                              //OkHttp缓存对象
-    private File mCacheFile;                                           //缓存目录
+    String mUrl;                                                      //请求Url
+    private Cache mCache;                                             //OkHttp缓存对象
+    private File mCacheFile;                                          //缓存目录
     private long mCacheMaxSize;                                       //最大缓存
-    private Proxy mProxy;                                              //OkHttp代理
-    private HostnameVerifier mHostnameVerifier;                        //https的全局访问规则
-    private Converter.Factory mConverterFactory;                       //Converter.Factory
-    private CallAdapter.Factory mCallAdapterFactory;                   //CallAdapter.Factory
-    private SSLSocketFactory mSslSocketFactory;                        //签名验证规则
+    private Proxy mProxy;                                             //OkHttp代理
+    private HostnameVerifier mHostnameVerifier;                       //https的全局访问规则
+    private Converter.Factory mConverterFactory;                      //Converter.Factory
+    private CallAdapter.Factory mCallAdapterFactory;                  //CallAdapter.Factory
+    private SSLSocketFactory mSslSocketFactory;                       //签名验证规则
     private X509TrustManager mTrustManager;
-    private SSLUtil.SSLParams mSslParams;                              //https签名证书
-    private CookieJar mCookieJar;                                      //Cookie管理
-    private ConnectionPool mConnectionPool;                            //链接池管理
-    private Map<String, String> mHeaders = new HashMap<>();            //公共请求头
-     Map<String, String> mParameters = new HashMap<>();         //公共请求参数
-    private OkHttpClient mHttpClient;                                  //自定义OkHttpClient
-    private int mReadTimeout;                                          //读超时
-    private int mWriteTimeout;                                         //写超时
-    private int mConnectTimeout;                                       //链接超时
-    int mRetryCount;                                         //重试次数默认3次
-    int mRetryDelay;                                         //延迟xxms重试
-    int mRetryIncreaseDelay;                                 //叠加延迟
+    private SSLUtil.SSLParams mSslParams;                             //https签名证书
+    private CookieJar mCookieJar;                                     //Cookie管理
+    private ConnectionPool mConnectionPool;                           //链接池管理
+    private Map<String, String> mHeaders = new HashMap<>();           //公共请求头
+    //    Map<String, String> mParameters = new HashMap<>();                //请求参数
+//    Map<String, String> mFileMap = new HashMap<>();                   //上传文件
+    HttpParamEntity mHttpParams = new HttpParamEntity();      //请求参数集合
+    private OkHttpClient mHttpClient;                                 //自定义OkHttpClient
+    private int mReadTimeout;                                         //读超时
+    private int mWriteTimeout;                                        //写超时
+    private int mConnectTimeout;                                      //链接超时
+    int mRetryCount;                                                  //重试次数默认3次
+    int mRetryDelay;                                                  //延迟xxms重试
+    int mRetryIncreaseDelay;                                          //叠加延迟
     private List<Interceptor> mInterceptorList = new ArrayList<>();
     private List<Interceptor> mNetworkInterceptorList = new ArrayList<>();
     Context mContext;
@@ -157,7 +164,7 @@ public abstract class BaseRequest<R extends BaseRequest> {
         return (R) this;
     }
 
-    public R headers(Map<String, String> headers) {
+    public R addHeader(Map<String, String> headers) {
         this.mHeaders.putAll(Util.checkNotNull(headers, "headers is null"));
         return (R) this;
     }
@@ -181,8 +188,13 @@ public abstract class BaseRequest<R extends BaseRequest> {
         return (R) this;
     }
 
-    public R parameters(Map<String, String> parameters) {
-        this.mParameters.putAll(Util.checkNotNull(parameters, "param is null"));
+    public R param(Map<String, String> parameters) {
+        this.mHttpParams.param(Util.checkNotNull(parameters, "param is null"));
+        return (R) this;
+    }
+
+    public R param(String key, String value) {
+        this.mHttpParams.param(key, value);
         return (R) this;
     }
 
@@ -388,8 +400,47 @@ public abstract class BaseRequest<R extends BaseRequest> {
         }
     }
 
-    protected R build() {
+    protected <T> R build() {
+        build(null);
+        return (R) this;
+    }
+
+    protected <T> R build(ResultCallback<T> callback) {
         OkHttpClient.Builder okHttpClientBuilder = generateOkHttpClientBuilder();
+        if (callback != null && callback instanceof ResultProgressCallback) {
+            okHttpClientBuilder.addInterceptor(new ProgressRequestInterceptor((ResultProgressCallback) callback));
+        }
+        Retrofit.Builder retrofitBuilder = generateRetrofitBuilder();
+        if (mHttpClient != null) {
+            retrofitBuilder.client(mHttpClient);
+        } else if (RxHttp.getInstance().getHttpClient() != null) {
+            retrofitBuilder.client(RxHttp.getInstance().getHttpClient());
+        } else {
+            retrofitBuilder.client(okHttpClientBuilder.build());
+        }
+        mRetrofit = retrofitBuilder.build();
+        mApiManager = mRetrofit.create(ApiManager.class);
+        return (R) this;
+    }
+
+    protected <T> R upload(ResultProgressCallback<T> callback) {
+        OkHttpClient.Builder okHttpClientBuilder = generateOkHttpClientBuilder();
+        Retrofit.Builder retrofitBuilder = generateRetrofitBuilder();
+        if (mHttpClient != null) {
+            retrofitBuilder.client(mHttpClient);
+        } else if (RxHttp.getInstance().getHttpClient() != null) {
+            retrofitBuilder.client(RxHttp.getInstance().getHttpClient());
+        } else {
+            retrofitBuilder.client(okHttpClientBuilder.build());
+        }
+        mRetrofit = retrofitBuilder.build();
+        mApiManager = mRetrofit.create(ApiManager.class);
+        return (R) this;
+    }
+
+    protected <T> R download(ResultProgressCallback<T> callback) {
+        OkHttpClient.Builder okHttpClientBuilder = generateOkHttpClientBuilder();
+        okHttpClientBuilder.addInterceptor(new ProgressResponseInterceptor(callback));
         Retrofit.Builder retrofitBuilder = generateRetrofitBuilder();
         if (mHttpClient != null) {
             retrofitBuilder.client(mHttpClient);

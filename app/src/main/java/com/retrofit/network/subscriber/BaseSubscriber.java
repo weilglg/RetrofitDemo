@@ -44,7 +44,6 @@ public abstract class BaseSubscriber<T> extends DisposableObserver<T> {
     public void onError(@NonNull Throwable e) {
         if (e != null && e.getMessage() != null) {
             LogUtil.v("RxHttp", e.getMessage());
-
         } else {
             LogUtil.v("RxHttp", "Throwable  || Message == Null");
         }

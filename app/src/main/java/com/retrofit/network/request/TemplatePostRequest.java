@@ -22,11 +22,23 @@ public class TemplatePostRequest extends HttpBodyRequest<TemplatePostRequest> {
         super(url);
     }
 
-    public <T> Observable<T> generateObservable(Type type) {
-        return generateObservable(type, null);
+    public <T> Observable<T> execute(Type type) {
+        return build().generateRequest()
+                .compose(isSyncRequest ? RxUtil._io_main() : RxUtil._main())
+                .compose(new HandleErrorTransformer())
+                .retryWhen(new RetryExceptionFunc(mRetryCount, mRetryDelay, mRetryIncreaseDelay))
+                .compose(new HandleClazzBodyTransformer(type, null));
     }
 
-    public <T> Observable<T> generateObservable(Type type, ResponseClazzCallback callback) {
+    public <T> Observable<T> execute(Class<T> clazz) {
+        return build(null).generateRequest()
+                .compose(isSyncRequest ? RxUtil._io_main() : RxUtil._main())
+                .compose(new HandleErrorTransformer())
+                .retryWhen(new RetryExceptionFunc(mRetryCount, mRetryDelay, mRetryIncreaseDelay))
+                .compose(new HandleClazzBodyTransformer(clazz, null));
+    }
+
+    public <T> Observable<T> execute(Type type, ResponseClazzCallback callback) {
         return build().generateRequest()
                 .compose(isSyncRequest ? RxUtil._io_main() : RxUtil._main())
                 .compose(new HandleErrorTransformer())
@@ -34,11 +46,7 @@ public class TemplatePostRequest extends HttpBodyRequest<TemplatePostRequest> {
                 .compose(new HandleClazzBodyTransformer(type, callback));
     }
 
-    public <T> Observable<T> generateObservable(Class<T> clazz) {
-        return generateObservable(clazz, null);
-    }
-
-    public <T> Observable<T> generateObservable(Class<T> clazz, ResponseClazzCallback callback) {
+    public <T> Observable<T> execute(Class<T> clazz, ResponseClazzCallback callback) {
         return build().generateRequest()
                 .compose(isSyncRequest ? RxUtil._io_main() : RxUtil._main())
                 .compose(new HandleErrorTransformer())
@@ -57,5 +65,6 @@ public class TemplatePostRequest extends HttpBodyRequest<TemplatePostRequest> {
         return observable.compose(isSyncRequest ? RxUtil._io_main() : RxUtil._main())
                 .retryWhen(new RetryExceptionFunc(mRetryCount, mRetryDelay, mRetryIncreaseDelay));
     }
+
 
 }

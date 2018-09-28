@@ -6,7 +6,11 @@ public enum UploadFileType {
      */
     PART,
     /**
+     * RequestBody方式上传
+     */
+    BODY,
+    /**
      * Map RequestBody方式上传
      */
-    BODY
+    BODY_MAP
 }

@@ -36,7 +36,7 @@ public class RxSubscribe<T> extends BaseSubscriber<ResponseBody> {
     public void onNext(ResponseBody responseBody) {
         try {
             if (callback != null) {
-                callback.onSuccess(tag, callback.onTransformationResponse(tag, responseBody));
+                callback.onSuccess(tag, callback.onTransformationResponse(responseBody));
             }
         } catch (Exception e) {
             e.printStackTrace();

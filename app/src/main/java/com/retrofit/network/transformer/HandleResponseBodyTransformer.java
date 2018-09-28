@@ -22,7 +22,7 @@ public class HandleResponseBodyTransformer<T> implements ObservableTransformer<R
         return upstream.map(new Function<ResponseBody, T>() {
             @Override
             public T apply(ResponseBody body) throws Exception {
-                return callback.onTransformationResponse(mTag, body);
+                return callback.onTransformationResponse(body);
             }
         });
     }

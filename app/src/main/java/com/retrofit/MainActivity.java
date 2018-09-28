@@ -2,9 +2,11 @@ package com.retrofit;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.support.retrofit.Retrofit2ConverterFactory;
@@ -13,15 +15,22 @@ import com.retrofit.network.RxHttp;
 import com.retrofit.network.callback.ResponseTemplateCallback;
 import com.retrofit.network.callback.ResultCallback;
 import com.retrofit.network.callback.ResultCallbackProxy;
+import com.retrofit.network.callback.ResultProgressCallback;
 import com.retrofit.network.config.ResultConfigLoader;
 import com.retrofit.network.exception.ApiThrowable;
 import com.retrofit.network.util.LogUtil;
 import com.retrofit.network.util.TestApi;
 
+import java.io.File;
+import java.net.FileNameMap;
+import java.net.URLConnection;
 import java.util.List;
 
 import io.reactivex.observers.DisposableObserver;
+import okhttp3.MediaType;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+
+import static android.os.Environment.getExternalStorageState;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -156,7 +165,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(Object tag, String s) {
                         Log.e("tag", "onSuccess=" + s);
                     }
-                }){});
+                }) {
+                });
 //                .execute("resultPost", new ResultCallback<String>() {
 //                    @Override
 //                    public void onStart(Object tag) {
@@ -180,5 +190,39 @@ public class MainActivity extends AppCompatActivity {
 //                });
     }
 
+    public void uploadFile(View v) {
+        File file = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "1.jpg");
+        RxHttp.resultPost("upload5273")
+                .baseUrl("http://business-workbench.qingtian.ygego.alpha4/rest/")
+                .params("appId", "27")
+                .params("image", file)
+                .execute("upload", new ResultProgressCallback<String>() {
+                    @Override
+                    public void onStart(Object tag) {
+                        Toast.makeText(MainActivity.this, "开始上传", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onCompleted(Object tag) {
+
+                    }
+
+                    @Override
+                    public void onError(Object tag, ApiThrowable e) {
+
+                    }
+
+                    @Override
+                    public void onSuccess(Object tag, String s) {
+                        Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onUIProgressChanged(long numBytes, long totalBytes, float percent, float speed) {
+                        Toast.makeText(MainActivity.this, "numBytes=" + numBytes + "  " + "totalBytes=" + totalBytes + "  " + "percent=" + percent + "  " + "speed=" + speed, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 
 }
