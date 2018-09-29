@@ -19,16 +19,17 @@ import com.retrofit.network.callback.ResultCallbackProxy;
 import com.retrofit.network.callback.ResultProgressCallback;
 import com.retrofit.network.config.ResultConfigLoader;
 import com.retrofit.network.exception.ApiThrowable;
+import com.retrofit.network.request.CommPostRequest;
 import com.retrofit.network.util.LogUtil;
 import com.retrofit.network.util.TestApi;
 
 import java.io.File;
-import java.net.FileNameMap;
-import java.net.URLConnection;
 import java.util.List;
 
 import io.reactivex.observers.DisposableObserver;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 import static android.os.Environment.getExternalStorageState;
@@ -146,7 +147,12 @@ public class MainActivity extends AppCompatActivity {
 
         RxHttp.resultPost("home/hotnews")
                 .jsonObj(param)
-                .execute("resultPost", new ResultCallbackProxy<TestApi<String>, String>(new ResultCallback<String>() {
+                .execute("resultPost", new ResultCallbackProxy<TestApi<String>, String>(new ResultProgressCallback<String>() {
+                    @Override
+                    public void onUIProgressChanged(Object mTag, long numBytes, long totalBytes, float percent, float speed) {
+                        Toast.makeText(MainActivity.this, "numBytes=" + numBytes + "  " + "totalBytes=" + totalBytes + "  " + "percent=" + percent + "  " + "speed=" + speed, Toast.LENGTH_SHORT).show();
+                    }
+
                     @Override
                     public void onStart(Object tag) {
                         Log.e("tag", "onStart");
@@ -191,14 +197,14 @@ public class MainActivity extends AppCompatActivity {
 //                });
     }
 
-    public void uploadFile(View v) {
+    public void uploadPartFile(View v) {
         File file = new File(Environment.getExternalStorageDirectory() +
                 File.separator + "1.jpg");
-        RxHttp.resultPost("common/uploadImg")
-                .baseUrl("https://ygzk.ygego.cn/api/")
+        new CommPostRequest("upload5273")
+                .baseUrl("http://business-workbench.qingtian.ygego.alpha3/rest/")
                 .params("appId", "27")
-                .uploadType(UploadFileType.FROM)
-                .params("image", file)
+                .uploadType(UploadFileType.PART_FROM)
+                .params("file", file)
                 .execute("upload", new ResultProgressCallback<String>() {
                     @Override
                     public void onStart(Object tag) {
@@ -221,7 +227,45 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onUIProgressChanged(long numBytes, long totalBytes, float percent, float speed) {
+                    public void onUIProgressChanged(Object tag, long numBytes, long totalBytes, float percent, float speed) {
+                        Toast.makeText(MainActivity.this, "numBytes=" + numBytes + "  " + "totalBytes=" + totalBytes + "  " + "percent=" + percent + "  " + "speed=" + speed, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    public void uploadBodyFile(View v) {
+        File file = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "1.jpg");
+        RequestBody requestBody1 = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("appId", "27")
+                .addFormDataPart("file", file.getName(), RequestBody.create(MediaType.parse("image/*"), file))
+                .build();
+        new CommPostRequest("upload5273")
+                .baseUrl("http://business-workbench.qingtian.ygego.alpha3/rest/")
+                .requestBody(requestBody1)
+                .execute("upload", new ResultProgressCallback<String>() {
+                    @Override
+                    public void onStart(Object tag) {
+                        Toast.makeText(MainActivity.this, "开始上传", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onCompleted(Object tag) {
+
+                    }
+
+                    @Override
+                    public void onError(Object tag, ApiThrowable e) {
+
+                    }
+
+                    @Override
+                    public void onSuccess(Object tag, String s) {
+                        Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onUIProgressChanged(Object tag, long numBytes, long totalBytes, float percent, float speed) {
                         Toast.makeText(MainActivity.this, "numBytes=" + numBytes + "  " + "totalBytes=" + totalBytes + "  " + "percent=" + percent + "  " + "speed=" + speed, Toast.LENGTH_SHORT).show();
                     }
                 });

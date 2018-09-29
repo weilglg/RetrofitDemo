@@ -41,7 +41,7 @@ public interface ApiManager {
 
     @FormUrlEncoded
     @POST()
-    Observable<ResponseBody> postMap(@Url String mUrl, @FieldMap Map<String, String> maps);
+    Observable<ResponseBody> postMap(@Url String mUrl, @FieldMap(encoded = true) Map<String, String> maps);
 
     @Multipart
     @POST()
@@ -60,7 +60,7 @@ public interface ApiManager {
 
     @Multipart
     @POST()
-    Observable<ResponseBody> uploadFileWithPart(@Url String fileUrl, @Part()MultipartBody.Part file);
+    Observable<ResponseBody> uploadFileWithBodyMap(@Url String mUrl, @retrofit2.http.Body List<RequestBody> maps);
 
 
 //    @POST()

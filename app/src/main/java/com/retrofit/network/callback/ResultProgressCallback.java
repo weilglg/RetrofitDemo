@@ -13,6 +13,7 @@ import android.os.Message;
  * @since 2017-07-12 16:19
  */
 public abstract class ResultProgressCallback<T> extends ResultCallback<T> {
+    private Object mTag;
     boolean started;
     long lastRefreshTime = 0L;
     long lastBytesWritten = 0L;
@@ -26,6 +27,14 @@ public abstract class ResultProgressCallback<T> extends ResultCallback<T> {
     private static final String TOTAL_BYTES = "totalBytes";
     private static final String PERCENT = "percent";
     private static final String SPEED = "speed";
+
+    public void setTag(Object mTag) {
+        this.mTag = mTag;
+    }
+
+    public Object getTag() {
+        return mTag;
+    }
 
     private void ensureHandler() {
         if (mHandler != null) {
@@ -45,7 +54,7 @@ public abstract class ResultProgressCallback<T> extends ResultCallback<T> {
                                 if (startData == null) {
                                     return;
                                 }
-                                onUIProgressStart(startData.getLong(TOTAL_BYTES));
+                                onUIProgressStart(mTag, startData.getLong(TOTAL_BYTES));
                                 break;
                             case WHAT_UPDATE:
                                 Bundle updateData = msg.getData();
@@ -56,10 +65,10 @@ public abstract class ResultProgressCallback<T> extends ResultCallback<T> {
                                 long totalBytes = updateData.getLong(TOTAL_BYTES);
                                 float percent = updateData.getFloat(PERCENT);
                                 float speed = updateData.getFloat(SPEED);
-                                onUIProgressChanged(numBytes, totalBytes, percent, speed);
+                                onUIProgressChanged(mTag, numBytes, totalBytes, percent, speed);
                                 break;
                             case WHAT_FINISH:
-                                onUIProgressFinish();
+                                onUIProgressFinish(mTag);
                                 break;
                             default:
                                 break;
@@ -112,9 +121,9 @@ public abstract class ResultProgressCallback<T> extends ResultCallback<T> {
      * @param percent    百分比
      * @param speed      速度 bytes/ms
      */
-    public void onProgressChanged(long numBytes, long totalBytes, float percent, float speed){
+    private void onProgressChanged(long numBytes, long totalBytes, float percent, float speed) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            onUIProgressChanged(numBytes, totalBytes, percent, speed);
+            onUIProgressChanged(mTag, numBytes, totalBytes, percent, speed);
             return;
         }
         ensureHandler();
@@ -134,9 +143,9 @@ public abstract class ResultProgressCallback<T> extends ResultCallback<T> {
      *
      * @param totalBytes 总大小
      */
-    public void onProgressStart(long totalBytes) {
+    private void onProgressStart(long totalBytes) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            onUIProgressStart(totalBytes);
+            onUIProgressStart(mTag, totalBytes);
             return;
         }
         ensureHandler();
@@ -151,9 +160,9 @@ public abstract class ResultProgressCallback<T> extends ResultCallback<T> {
     /**
      * 进度结束
      */
-    public void onProgressFinish() {
+    private void onProgressFinish() {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            onUIProgressFinish();
+            onUIProgressFinish(mTag);
             return;
         }
         ensureHandler();
@@ -170,21 +179,21 @@ public abstract class ResultProgressCallback<T> extends ResultCallback<T> {
      * @param percent    百分比
      * @param speed      速度 bytes/ms
      */
-    public abstract void onUIProgressChanged(long numBytes, long totalBytes, float percent, float speed);
+    public abstract void onUIProgressChanged(Object mTag, long numBytes, long totalBytes, float percent, float speed);
 
     /**
      * 进度开始
      *
      * @param totalBytes 总大小
      */
-    public void onUIProgressStart(long totalBytes) {
+    public void onUIProgressStart(Object mTag, long totalBytes) {
 
     }
 
     /**
      * 进度结束
      */
-    public void onUIProgressFinish() {
+    public void onUIProgressFinish(Object mTag) {
 
     }
 }
