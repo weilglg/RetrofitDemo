@@ -1,20 +1,8 @@
 package com.retrofit.network.callback;
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-
 import com.retrofit.network.exception.ApiThrowable;
 
-/**
- * 进度回调
- *
- * @author lizhangqu
- * @version V1.0
- * @since 2017-07-12 16:19
- */
-public abstract class ResultProgressCallback<T> extends ResultCallback<T> {
+public abstract class ResultDownloadCallback extends ResultProgressCallback<String> {
 
     /**
      * 进度发生了改变，如果numBytes，totalBytes，percent，speed都为-1，则表示总大小获取不到
@@ -28,10 +16,8 @@ public abstract class ResultProgressCallback<T> extends ResultCallback<T> {
 
     /**
      * 进度开始
-     *
-     * @param totalBytes 总大小
      */
-    public void onUIProgressStart(Object mTag, long totalBytes) {
+    public void onUIProgressStart(Object mTag) {
 
     }
 
@@ -42,18 +28,12 @@ public abstract class ResultProgressCallback<T> extends ResultCallback<T> {
 
     }
 
-    @Override
-    public void onStart(Object tag) {
-
-    }
-
-    @Override
-    public void onSuccess(Object tag, T t) {
-
-    }
-
-    @Override
     public void onError(Object tag, ApiThrowable e) {
+
+    }
+
+    @Override
+    public void onCompleted(Object tag) {
 
     }
 }

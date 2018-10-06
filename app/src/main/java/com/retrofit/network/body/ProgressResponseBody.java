@@ -30,11 +30,13 @@ public class ProgressResponseBody extends ResponseBody {
     private final ResponseBody responseBody;
     private final ResultProgressCallback progressListener;
     private BufferedSource progressSource;
+    private Object tag;
 
 
-    public ProgressResponseBody(ResponseBody responseBody, ResultProgressCallback progressListener) {
+    public ProgressResponseBody(ResponseBody responseBody, ResultProgressCallback progressListener, Object tag) {
         this.responseBody = responseBody;
         this.progressListener = progressListener;
+        this.tag = tag;
     }
 
 
@@ -53,9 +55,10 @@ public class ProgressResponseBody extends ResponseBody {
     @Override
     public BufferedSource source() {
         if (progressListener == null) {
+
             return responseBody.source();
         }
-        ProgressInputStream progressInputStream = new ProgressInputStream(responseBody.source().inputStream(), progressListener, contentLength());
+        ProgressInputStream progressInputStream = new ProgressInputStream(responseBody.source().inputStream(), progressListener, contentLength(), tag);
         progressSource = Okio.buffer(Okio.source(progressInputStream));
         return progressSource;
     }

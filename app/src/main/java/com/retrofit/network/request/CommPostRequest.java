@@ -6,7 +6,7 @@ import com.retrofit.network.entity.CommResultEntity;
 
 import io.reactivex.disposables.Disposable;
 
-public class CommPostRequest extends ApiResultPostRequest {
+public class CommPostRequest extends UploadRequest {
 
     public CommPostRequest(String url) {
         super(url);

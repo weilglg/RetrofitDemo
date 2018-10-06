@@ -5,8 +5,10 @@ import android.content.Context;
 
 import com.retrofit.BuildConfig;
 import com.retrofit.network.interceptor.HeaderInterceptor;
+import com.retrofit.network.request.DownloadRequest;
 import com.retrofit.network.request.TemplatePostRequest;
 import com.retrofit.network.request.ApiResultPostRequest;
+import com.retrofit.network.request.UploadRequest;
 import com.retrofit.network.util.LogUtil;
 import com.retrofit.network.util.SSLUtil;
 import com.retrofit.network.util.Util;
@@ -503,5 +505,13 @@ public final class RxHttp {
 
     public static ApiResultPostRequest resultPost(String url) {
         return new ApiResultPostRequest(url);
+    }
+
+    public static UploadRequest upload(String url) {
+        return new UploadRequest(url);
+    }
+
+    public static DownloadRequest download(String url) {
+        return new DownloadRequest(url);
     }
 }

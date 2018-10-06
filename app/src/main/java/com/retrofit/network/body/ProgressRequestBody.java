@@ -29,11 +29,13 @@ import okio.Okio;
 public class ProgressRequestBody extends RequestBody {
     private final RequestBody mRequestBody;
     private final ResultProgressCallback progressListener;
+    private final Object tag;
 
 
-    public ProgressRequestBody(RequestBody requestBody, ResultProgressCallback progressListener) {
+    public ProgressRequestBody(RequestBody requestBody, ResultProgressCallback progressListener, Object tag) {
         this.mRequestBody = requestBody;
         this.progressListener = progressListener;
+        this.tag = tag;
     }
 
     @Override
@@ -52,7 +54,7 @@ public class ProgressRequestBody extends RequestBody {
             mRequestBody.writeTo(sink);
             return;
         }
-        ProgressOutputStream progressOutputStream = new ProgressOutputStream(sink.outputStream(), progressListener, contentLength());
+        ProgressOutputStream progressOutputStream = new ProgressOutputStream(sink.outputStream(), progressListener, contentLength(), tag);
         BufferedSink progressSink = Okio.buffer(Okio.sink(progressOutputStream));
         mRequestBody.writeTo(progressSink);
         progressSink.flush();

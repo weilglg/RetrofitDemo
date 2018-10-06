@@ -31,7 +31,7 @@ public class TemplatePostRequest extends HttpBodyRequest<TemplatePostRequest> {
     }
 
     public <T> Observable<T> execute(Class<T> clazz) {
-        return build(null).generateRequest()
+        return build().generateRequest()
                 .compose(isSyncRequest ? RxUtil._io_main() : RxUtil._main())
                 .compose(new HandleErrorTransformer())
                 .retryWhen(new RetryExceptionFunc(mRetryCount, mRetryDelay, mRetryIncreaseDelay))

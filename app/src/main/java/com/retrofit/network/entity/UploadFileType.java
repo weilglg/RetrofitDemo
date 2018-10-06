@@ -1,6 +1,4 @@
-package com.retrofit.network;
-
-import okhttp3.MultipartBody;
+package com.retrofit.network.entity;
 
 public enum UploadFileType {
     /**
@@ -14,5 +12,9 @@ public enum UploadFileType {
     /**
      * Map<RequestBody>方式上传
      */
-    BODY_MAP
+    BODY_MAP,
+    /**
+     * RequestBody方式上传，该方式不支持普通参数
+     */
+    BODY
 }

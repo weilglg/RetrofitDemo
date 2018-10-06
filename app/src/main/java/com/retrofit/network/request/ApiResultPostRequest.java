@@ -44,11 +44,7 @@ public class ApiResultPostRequest extends HttpBodyRequest<ApiResultPostRequest> 
     }
 
     public <T> Disposable execute(Object tag, ResultCallbackProxy<? extends ApiResultEntity<T>, T> proxy) {
-        ResultCallback<T> callback = proxy.getCallback();
-        if (callback instanceof ResultProgressCallback) {
-            ((ResultProgressCallback) callback).setTag(tag);
-        }
-        Observable<T> observable = build(callback).generateObservable(generateRequest(), proxy);
+        Observable<T> observable = build().generateObservable(generateRequest(), proxy);
         return observable.subscribeWith(new ResultCallbackSubscriber<T>(tag, proxy.getCallback()));
     }
 

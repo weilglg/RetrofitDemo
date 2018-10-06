@@ -2,110 +2,166 @@ package com.retrofit.network.request;
 
 import android.text.TextUtils;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.retrofit.network.ApiManager;
+import com.retrofit.network.RxHttp;
+import com.retrofit.network.entity.UploadFileType;
+import com.retrofit.network.callback.ResultCallback;
+import com.retrofit.network.callback.ResultCallbackProxy;
+import com.retrofit.network.callback.ResultClazzCallProxy;
+import com.retrofit.network.callback.ResultProgressCallback;
+import com.retrofit.network.entity.ApiResultEntity;
 import com.retrofit.network.entity.FileEntity;
+import com.retrofit.network.func.ApiResultFunc;
+import com.retrofit.network.func.RetryExceptionFunc;
+import com.retrofit.network.interceptor.ProgressRequestInterceptor;
+import com.retrofit.network.subscriber.ResultCallbackSubscriber;
+import com.retrofit.network.util.RxUtil;
 import com.retrofit.network.util.Util;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import okio.BufferedSink;
 import okio.Okio;
 import okio.Source;
+import retrofit2.Retrofit;
 
 @SuppressWarnings(value = {"unchecked", "deprecation"})
-public class HttpBodyRequest<R extends BaseRequest> extends BaseRequest<R> {
-    private RequestBody mRequestBody;
-    private String mJsonStr;
-    private JSONObject mJsonObj;
-    private JSONArray mJsonArr;
-    private byte[] mBytes;
-    private String mStr;
-    private Object mObject;
-    private MediaType mMediaType;
+public class UploadRequest extends BaseRequest<UploadRequest> {
 
-    public HttpBodyRequest(String url) {
+    private RequestBody mRequestBody;
+    private UploadFileType mUploadType;
+
+    public UploadRequest(String url) {
         super(url);
     }
 
-
-    public R requestBody(RequestBody requestBody) {
+    public UploadRequest requestBody(RequestBody requestBody) {
         this.mRequestBody = requestBody;
-        return (R) this;
+        return this;
     }
 
-    public R json(String jsonStr) {
-        this.mJsonStr = jsonStr;
-        return (R) this;
+    public UploadRequest params(String key, File file) {
+        mHttpParams.put(key, file);
+        return this;
     }
 
-    public R jsonObj(JSONObject obj) {
-        this.mJsonObj = obj;
-        return (R) this;
+    public UploadRequest params(String key, String fileName, InputStream stream) {
+        mHttpParams.put(key, fileName, stream);
+        return this;
     }
 
-    public R jsonArr(JSONArray jsonArray) {
-        this.mJsonArr = jsonArray;
-        return (R) this;
+    public UploadRequest params(String key, String fileName, byte[] bytes) {
+        mHttpParams.put(key, fileName, bytes);
+        return this;
     }
 
-    public R object(Object obj) {
-        this.mObject = obj;
-        return (R) this;
+    public UploadRequest addFileParams(String key, List<File> files) {
+        if (TextUtils.isEmpty(key) && files != null && !files.isEmpty()) {
+            for (File file : files) {
+                params(key, file);
+            }
+        }
+        return this;
     }
 
-    public R bytes(byte[] bytes) {
-        this.mBytes = bytes;
-        return (R) this;
+    public UploadRequest addFileWrapperParams(String key, List<FileEntity> fileWrappers) {
+        mHttpParams.put(key, fileWrappers);
+        return this;
     }
 
-    public R txt(String txt) {
-        this.mStr = txt;
-        this.mMediaType = okhttp3.MediaType.parse("text/plain");
-        return (R) this;
+    public UploadRequest params(String key, File file, String fileName) {
+        mHttpParams.put(key, file, fileName);
+        return this;
     }
 
-    public R mediaType(String txt, MediaType mediaType) {
-        this.mStr = txt;
-        Util.checkNotNull(mediaType, "mediaType==null");
-        this.mMediaType = mediaType;
-        return (R) this;
+    public <T> UploadRequest params(String key, String fileName, T file, MediaType contentType) {
+        mHttpParams.put(key, fileName, file, contentType);
+        return this;
+    }
+
+    public UploadRequest uploadType(UploadFileType type) {
+        this.mUploadType = type;
+        return this;
+    }
+
+
+    protected <T> UploadRequest build(Object tag, ResultProgressCallback callback) {
+        OkHttpClient.Builder okHttpClientBuilder = generateOkHttpClientBuilder();
+        okHttpClientBuilder.addInterceptor(new ProgressRequestInterceptor(tag, callback));
+        Retrofit.Builder retrofitBuilder = generateRetrofitBuilder();
+        if (mHttpClient != null) {
+            retrofitBuilder.client(mHttpClient);
+        } else if (RxHttp.getInstance().getHttpClient() != null) {
+            retrofitBuilder.client(RxHttp.getInstance().getHttpClient());
+        } else {
+            retrofitBuilder.client(okHttpClientBuilder.build());
+        }
+        Retrofit mRetrofit = retrofitBuilder.build();
+        mApiManager = mRetrofit.create(ApiManager.class);
+        return build();
     }
 
     @Override
     protected Observable<ResponseBody> generateRequest() {
-        if (mRequestBody != null) {
+        Util.checkNotNull(mUploadType, "UploadType is null");
+        if (mUploadType == UploadFileType.BODY_MAP) {
+            return uploadFilesWithBodyMap();
+        } else if (mUploadType == UploadFileType.PART_FROM) {
+            return uploadFilesWithPartList();
+        } else if (mUploadType == UploadFileType.PART_MAP) {
+            return uploadFilesWithPartMap();
+        } else {
             return mApiManager.postBody(mUrl, mRequestBody);
-        } else if (!TextUtils.isEmpty(mJsonStr)) {
-            return mApiManager.potJsonStr(mUrl, Util.createJson(mJsonStr));
-        } else if (mJsonObj != null) {
-            return mApiManager.postJson(mUrl, mJsonObj);
-        } else if (mJsonArr != null) {
-            return mApiManager.postJson(mUrl, mJsonArr);
-        } else if (!TextUtils.isEmpty(mStr)) {
-            RequestBody requestBody = RequestBody.create(mMediaType, mStr);
-            return mApiManager.postBody(mUrl, requestBody);
-        } else if (mBytes != null) {
-            return mApiManager.postBody(mUrl, Util.createBytes(mBytes));
-        } else if (mObject != null) {
-            return mApiManager.postBody(mUrl, mObject);
-        } else if (!mHttpParams.isParamsEmpty() && mHttpParams.isFilesEmpty()) {
-            return mApiManager.postMap(mUrl, mHttpParams.getParamMap());
-        }  else {
-            return mApiManager.post(mUrl);
         }
     }
+
+
+    public <T> Observable<T> execute(Class<T> clazz, ResultProgressCallback<T> callback) {
+        return execute(new ResultClazzCallProxy<ApiResultEntity<T>, T>(clazz) {
+        }, callback);
+    }
+
+    public <T> Observable<T> execute(Type type, ResultProgressCallback<T> callback) {
+        return execute(new ResultClazzCallProxy<ApiResultEntity<T>, T>(type) {
+        }, callback);
+    }
+
+    public <T> Observable<T> execute(ResultClazzCallProxy<? extends ApiResultEntity<T>, T> proxy, ResultProgressCallback<T> callback) {
+        return build(null, callback).generateRequest()
+                .map(new ApiResultFunc(proxy.getType()))
+                .compose(isSyncRequest ? RxUtil._io_main_result() : RxUtil._main_result())
+                .retryWhen(new RetryExceptionFunc(mRetryCount, mRetryDelay, mRetryIncreaseDelay));
+    }
+
+    public <T> Disposable execute(Object tag, ResultCallback<T> callback) {
+        return execute(tag, ResultCallbackProxy.NEW_DEFAULT_INSTANCE(callback));
+    }
+
+    public <T> Disposable execute(Object tag, ResultCallbackProxy<? extends ApiResultEntity<T>, T> proxy) {
+        Observable<T> observable = build(tag, (ResultProgressCallback) proxy.getCallback()).generateObservable(generateRequest(), proxy);
+        return observable.subscribeWith(new ResultCallbackSubscriber<T>(tag, proxy.getCallback()));
+    }
+
+    private <T> Observable<T> generateObservable(Observable observable, ResultCallbackProxy<? extends ApiResultEntity<T>, T> proxy) {
+        return observable.map(new ApiResultFunc(proxy.getType()))
+                .compose(isSyncRequest ? RxUtil._io_main_result() : RxUtil._main_result())
+                .retryWhen(new RetryExceptionFunc(mRetryCount, mRetryDelay, mRetryIncreaseDelay));
+    }
+
 
     /**
      * 以RequestBody的Map形式提交

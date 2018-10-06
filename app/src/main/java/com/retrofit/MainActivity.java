@@ -12,9 +12,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.support.retrofit.Retrofit2ConverterFactory;
 import com.retrofit.network.Demo;
 import com.retrofit.network.RxHttp;
-import com.retrofit.network.UploadFileType;
+import com.retrofit.network.callback.ResultDownloadCallback;
+import com.retrofit.network.entity.UploadFileType;
 import com.retrofit.network.callback.ResponseTemplateCallback;
-import com.retrofit.network.callback.ResultCallback;
 import com.retrofit.network.callback.ResultCallbackProxy;
 import com.retrofit.network.callback.ResultProgressCallback;
 import com.retrofit.network.config.ResultConfigLoader;
@@ -200,11 +200,14 @@ public class MainActivity extends AppCompatActivity {
     public void uploadPartFile(View v) {
         File file = new File(Environment.getExternalStorageDirectory() +
                 File.separator + "1.jpg");
+        File file2 = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "2.jpg");
         new CommPostRequest("upload5273")
+                .param("appId", "27")
                 .baseUrl("http://business-workbench.qingtian.ygego.alpha3/rest/")
-                .params("appId", "27")
                 .uploadType(UploadFileType.PART_FROM)
                 .params("file", file)
+                .params("file", file2)
                 .execute("upload", new ResultProgressCallback<String>() {
                     @Override
                     public void onStart(Object tag) {
@@ -242,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         new CommPostRequest("upload5273")
                 .baseUrl("http://business-workbench.qingtian.ygego.alpha3/rest/")
+                .uploadType(UploadFileType.BODY)
                 .requestBody(requestBody1)
                 .execute("upload", new ResultProgressCallback<String>() {
                     @Override
@@ -268,6 +272,19 @@ public class MainActivity extends AppCompatActivity {
                     public void onUIProgressChanged(Object tag, long numBytes, long totalBytes, float percent, float speed) {
                         Toast.makeText(MainActivity.this, "numBytes=" + numBytes + "  " + "totalBytes=" + totalBytes + "  " + "percent=" + percent + "  " + "speed=" + speed, Toast.LENGTH_SHORT).show();
                     }
+                });
+    }
+
+    public void downFile(View v) {
+        RxHttp.download("http://res.qingtian.ygego.alpha3/userbusipub/M00/00/01/CiWTOluu1s-AYF60AAHpjiW__vM457.jpg")
+                .saveName("111")
+                .savePath(Environment.getExternalStorageDirectory().getAbsolutePath())
+                .execute("file", new ResultDownloadCallback() {
+                    @Override
+                    public void onUIProgressChanged(Object mTag, long numBytes, long totalBytes, float percent, float speed) {
+                        Log.e("TAG", "numBytes=" + numBytes + " totalBytes=" + totalBytes + " percent=" + percent + " speed=" + speed);
+                    }
+
                 });
     }
 

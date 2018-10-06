@@ -16,16 +16,18 @@ import okhttp3.Response;
 
 public class ProgressRequestInterceptor implements Interceptor {
     private ResultProgressCallback progressListener;
+    private Object tag;
 
-    public ProgressRequestInterceptor(ResultProgressCallback progressListener) {
+    public ProgressRequestInterceptor(Object tag, ResultProgressCallback progressListener) {
         this.progressListener = progressListener;
+        this.tag = tag;
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request original = chain.request();
         Request request = original.newBuilder()
-                .method(original.method(), new ProgressRequestBody(original.body(), progressListener))
+                .method(original.method(), new ProgressRequestBody(original.body(), progressListener, tag))
                 .build();
         return chain.proceed(request);
     }

@@ -15,9 +15,11 @@ import okhttp3.Response;
 
 public class ProgressResponseInterceptor implements Interceptor {
     private ResultProgressCallback progressListener;
+    private Object tag;
 
-    public ProgressResponseInterceptor(ResultProgressCallback progressListener) {
+    public ProgressResponseInterceptor(ResultProgressCallback progressListener, Object tag) {
         this.progressListener = progressListener;
+        this.tag = tag;
     }
 
     @Override
@@ -27,7 +29,7 @@ public class ProgressResponseInterceptor implements Interceptor {
 
         //包装响应体并返回
         return originalResponse.newBuilder()
-                .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                .body(new ProgressResponseBody(originalResponse.body(), progressListener, tag))
                 .build();
     }
 }
