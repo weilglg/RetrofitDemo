@@ -1,6 +1,6 @@
 package com.retrofit.network.callback;
 
-public abstract class DownloadProgressCallBack<T> extends ResultCallback<T> {
+public abstract class DownloadProgressCallBack extends ResultCallback<String> {
 
     /**
      * 下载进度回调
@@ -12,18 +12,15 @@ public abstract class DownloadProgressCallBack<T> extends ResultCallback<T> {
      */
     public abstract void onProgress(Object tag, long bytesRead, long fileSize, float progress);
 
+
     /**
      * 下载完成的回调
      *
      * @param tag      标识
      * @param filePath 存储的文件路径
      */
-    public abstract void onSucess(Object tag, String filePath);
-
     @Override
-    public void onSuccess(Object tag, T t) {
-
-    }
+    public abstract void onSuccess(Object tag, String filePath);
 
     @Override
     public void onCompleted(Object tag) {

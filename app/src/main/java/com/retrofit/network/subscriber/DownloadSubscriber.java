@@ -143,7 +143,7 @@ public class DownloadSubscriber<ResponseBody extends okhttp3.ResponseBody> exten
                             @Override
                             public void accept(String path) throws Exception {
                                 if (mCallback instanceof DownloadProgressCallBack) {
-                                    ((DownloadProgressCallBack) mCallback).onSucess(mTag, path);
+                                    ((DownloadProgressCallBack) mCallback).onSuccess(mTag, path);
                                 }
                             }
                         });
