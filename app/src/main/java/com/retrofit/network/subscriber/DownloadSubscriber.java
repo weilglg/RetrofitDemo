@@ -8,11 +8,9 @@ import com.retrofit.network.callback.DownloadProgressCallBack;
 import com.retrofit.network.callback.ResultCallback;
 import com.retrofit.network.exception.ApiThrowable;
 import com.retrofit.network.exception.ExceptionFactory;
-import com.retrofit.network.util.RxUtil;
 import com.retrofit.network.util.Util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +19,6 @@ import java.lang.ref.WeakReference;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import okhttp3.MediaType;
