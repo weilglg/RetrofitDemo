@@ -66,7 +66,7 @@ public interface ApiManager {
 
     @Streaming
     @GET
-    Observable<ResponseBody> download(@Url String mUrl);
+    Observable<ResponseBody> downloadFile(@Url String mUrl);
 
 
 //    @POST()

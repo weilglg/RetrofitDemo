@@ -105,7 +105,7 @@ public abstract class BaseDynamicInterceptor<R extends BaseDynamicInterceptor> i
         return request;
     }
 
-    //post 添加签名和公共动态参数
+    //templatePost 添加签名和公共动态参数
     private Request addPostParamsSign(Request request) throws UnsupportedEncodingException {
         if (request.body() instanceof FormBody) {
             FormBody.Builder bodyBuilder = new FormBody.Builder();

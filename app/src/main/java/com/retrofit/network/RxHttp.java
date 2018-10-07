@@ -499,7 +499,7 @@ public final class RxHttp {
         return retrofitBuilder.build();
     }
 
-    public static TemplatePostRequest post(String url) {
+    public static TemplatePostRequest templatePost(String url) {
         return new TemplatePostRequest(url);
     }
 

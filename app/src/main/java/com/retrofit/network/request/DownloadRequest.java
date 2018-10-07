@@ -36,7 +36,7 @@ public class DownloadRequest extends BaseRequest<DownloadRequest> {
 
     @Override
     protected Observable<ResponseBody> generateRequest() {
-        return mApiManager.download(mUrl);
+        return mApiManager.downloadFile(mUrl);
     }
 
     protected <T> DownloadRequest build(Object tag, ResultDownloadCallback callback) {

@@ -40,7 +40,10 @@ public class ExceptionFactory {
         }
         LogUtil.e("ExceptionFactory", detail);
         ApiThrowable ex;
-        if (!(e instanceof ServerException) && e instanceof HttpException) {
+        if (e instanceof ApiThrowable) {
+            ex = (ApiThrowable) e;
+            return ex;
+        } else if (!(e instanceof ServerException) && e instanceof HttpException) {
             HttpException httpException = (HttpException) e;
             ex = new ApiThrowable(e, httpException.code());
             switch (ex.getCode()) {

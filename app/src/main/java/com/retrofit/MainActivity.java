@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject param = new JSONObject();
                 param.put("pageSize", 1);
                 param.put("pageNum", 10);
-                RxHttp.post("home/hotnews")
+                RxHttp.templatePost("home/hotnews")
                         .jsonObj(param)
                         .execute(String.class).subscribeWith(new DisposableObserver<String>() {
                     @Override
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         param.put("pageSize", 1);
         param.put("pageNum", 10);
 
-        RxHttp.post("home/hotnews")
+        RxHttp.templatePost("home/hotnews")
                 .addHeader("11", "2222")
                 .addHeader("22", "2222")
                 .addHeader("33", "2222")
