@@ -1,2 +1,2 @@
-cn.com.rx
+com.cn.rx
 int string app_name 0x7f150001

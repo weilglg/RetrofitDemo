@@ -10,18 +10,17 @@ import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.support.retrofit.Retrofit2ConverterFactory;
+import com.cn.rx.RxHttp;
 import com.retrofit.network.Demo;
-import com.retrofit.network.RxHttp;
-import com.retrofit.network.UploadFileType;
-import com.retrofit.network.callback.ResponseTemplateCallback;
-import com.retrofit.network.callback.ResultCallback;
-import com.retrofit.network.callback.ResultCallbackProxy;
-import com.retrofit.network.callback.ResultProgressCallback;
-import com.retrofit.network.config.ResultConfigLoader;
-import com.retrofit.network.exception.ApiThrowable;
-import com.retrofit.network.request.CommPostRequest;
-import com.retrofit.network.util.LogUtil;
-import com.retrofit.network.util.TestApi;
+import com.cn.rx.config.UploadFileType;
+import com.cn.rx.callback.ResponseTemplateCallback;
+import com.cn.rx.callback.ResultCallbackProxy;
+import com.cn.rx.callback.ResultProgressCallback;
+import com.cn.rx.config.ResultConfigLoader;
+import com.cn.rx.exception.ApiThrowable;
+import com.cn.rx.request.CommPostRequest;
+import com.cn.rx.util.LogUtil;
+import com.cn.rx.util.TestApi;
 
 import java.io.File;
 import java.util.List;
