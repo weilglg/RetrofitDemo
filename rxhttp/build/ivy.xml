@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
-  <info organisation="RetrofitDemo_mave" module="rxhttp" revision="unspecified" status="integration" publication="20181023111254"/>
+  <info organisation="RetrofitDemo_mave" module="rxhttp" revision="unspecified" status="integration" publication="20181023112252"/>
   <configurations>
     <conf name="androidTestAnnotationProcessor" visibility="private"/>
     <conf name="androidTestApi" visibility="private" extends="androidTestCompile"/>
@@ -103,8 +103,6 @@
     <artifact name="rxhttp" type="aar" ext="aar" conf="archives,default"/>
   </publications>
   <dependencies>
-    <dependency org="com.android.support.test" name="runner" rev="1.0.2" conf="androidTestImplementation-&gt;default"/>
-    <dependency org="com.android.support.test.espresso" name="espresso-core" rev="3.0.2" conf="androidTestImplementation-&gt;default"/>
     <dependency org="com.squareup.retrofit2" name="retrofit" rev="2.3.0" conf="implementation-&gt;default"/>
     <dependency org="io.reactivex.rxjava2" name="rxjava" rev="2.1.9" conf="implementation-&gt;default"/>
     <dependency org="com.squareup.retrofit2" name="adapter-rxjava2" rev="2.3.0" conf="implementation-&gt;default"/>
@@ -112,6 +110,5 @@
     <dependency org="com.alibaba" name="fastjson" rev="1.2.49" conf="implementation-&gt;default"/>
     <dependency org="io.reactivex.rxjava2" name="rxandroid" rev="2.0.2" conf="implementation-&gt;default"/>
     <dependency org="com.android.tools.lint" name="lint-gradle" rev="26.1.4" conf="lintClassPath-&gt;default"/>
-    <dependency org="junit" name="junit" rev="4.12" conf="testImplementation-&gt;default"/>
   </dependencies>
 </ivy-module>
