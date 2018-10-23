@@ -32,7 +32,7 @@ android {
             pom.project {
                 groupId "com.cn.rx"
                 artifactId "rxhttp"
-                version 1.0
+                version "1.0.1"
             }
         }
     }
